@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Label Undangan Studio — Professional Label Maker</title>
+
+<!-- ============================================================
+     BOOTSTRAP TEMA (inline, anti flash-of-wrong-theme)
+     Set data-theme SEBELUM CSS dirender. Logika tema lengkap
+     ada di js/theme.js.
+     ============================================================ -->
+<script>
+try {
+  var t = localStorage.getItem('labelUndangan_theme');
+  if (t !== 'dark' && t !== 'light' && t !== 'glass') {
+    t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-theme', t);
+} catch (e) {}
+</script>
+
+<!-- ============================================================
+     LIBRARY PIHAK KETIGA — local-first, fallback CDN.
+     Struktur folder libs/ (sesuai repo github.com/jfuad39-creator/LIBS):
+       libs/xlsx.full.min.js              (baca/tulis Excel)
+       libs/mammoth.browser.min.js        (baca Word .docx)
+       libs/fontawesome/css/all.min.css   (ikon; + folder webfonts/)
+       libs/fonts/inter.css               (font Inter; + folder files/)
+     Bila file lokal tidak ada, otomatis memuat dari CDN (butuh internet).
+     CATATAN: Tailwind CDN yang lama sudah DIHAPUS — tidak ada satupun
+     class Tailwind yang dipakai (semua styling custom di css/styles.css).
+     libs/tailwind.js dari paket lama tidak dimuat & boleh dihapus.
+     ============================================================ -->
+<script src="libs/xlsx.full.min.js"></script>
+<script>if (typeof XLSX === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>');</script>
+<script src="libs/mammoth.browser.min.js"></script>
+<script>if (typeof mammoth === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"><\/script>');</script>
+
+<link rel="stylesheet" href="libs/fontawesome/css/all.min.css"
+      onerror="this.onerror=null;this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'">
+<!-- Font lokal = Inter (dari libs); online = Plus Jakarta Sans (Google Fonts).
+     css/styles.css mendaftarkan keduanya di font-stack, jadi mana pun
+     yang tersedia akan terpakai otomatis. -->
+<link rel="stylesheet" href="libs/fonts/inter.css"
+      onerror="this.onerror=null;this.href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap'">
+
+<!-- Styling aplikasi (semua tema: light / dark / glass) -->
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- RAIL SIDEBAR -->
+  <aside class="rail">
+    <div class="rail-logo">🏷️</div>
+    <div class="rail-sep"></div>
+    <div class="rail-actions">
+      <button class="icon-btn" onclick="undo()" title="Undo (Ctrl+Z)" aria-label="Undo" type="button"><i class="fas fa-undo" aria-hidden="true"></i></button>
+      <button class="icon-btn" onclick="redo()" title="Redo (Ctrl+Y)" aria-label="Redo" type="button"><i class="fas fa-redo" aria-hidden="true"></i></button>
+      <button class="icon-btn" onclick="showHelp()" title="Bantuan" aria-label="Buka bantuan" type="button"><i class="fas fa-question" aria-hidden="true"></i></button>
+      <button class="icon-btn" onclick="doPrint()" title="Print (Ctrl+P)" aria-label="Cetak label" type="button"><i class="fas fa-print" aria-hidden="true"></i></button>
+      <div class="rail-sep"></div>
+      <button class="icon-btn" onclick="openSettings()" title="Pengaturan Aplikasi" aria-label="Buka pengaturan aplikasi" type="button"><i class="fas fa-cog" aria-hidden="true"></i></button>
+      <button class="icon-btn theme-toggle-rail" onclick="toggleTheme()" title="Ganti tema: Terang → Gelap → Glass" id="railThemeBtn" aria-label="Ganti tema cepat" type="button">
+        <i class="fas fa-moon" id="railThemeIcon" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="rail-spacer"></div>
+  </aside>
+
+  <div class="app-main">
+
+    <header>
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">🏷️</div>
+          <div>
+            <h1>Label Undangan Studio</h1>
+            <p>Professional Wedding Label Design &amp; Print Tool</p>
+          </div>
+        </div>
+
+        <div class="switch-container">
+          <button class="switch-btn active" onclick="switchView('text')" id="btnText">
+            <i class="fas fa-file-alt"></i> Text Manager
+          </button>
+          <button class="switch-btn" onclick="switchView('label')" id="btnLabel">
+            <i class="fas fa-palette"></i> Label Maker
+          </button>
+        </div>
+
+        <div class="header-actions">
+          <div class="theme-switch" role="group" aria-label="Pilih tema tampilan" title="Pilih tema tampilan">
+            <div class="theme-switch-track">
+              <div class="theme-switch-thumb" id="themeThumb"></div>
+              <button class="theme-switch-opt active" id="themeOptLight" onclick="pickTheme(event,'light')" title="Tema Terang" aria-label="Aktifkan tema terang" type="button"><i class="fas fa-sun" aria-hidden="true"></i></button>
+              <button class="theme-switch-opt" id="themeOptDark" onclick="pickTheme(event,'dark')" title="Tema Gelap" aria-label="Aktifkan tema gelap" type="button"><i class="fas fa-moon" aria-hidden="true"></i></button>
+              <button class="theme-switch-opt" id="themeOptGlass" onclick="pickTheme(event,'glass')" title="Tema Glass" aria-label="Aktifkan tema glass" type="button"><i class="fas fa-gem" aria-hidden="true"></i></button>
+              <button class="theme-switch-opt" id="themeOptAi" onclick="pickTheme(event,'ai')" title="Illustrator Slim" aria-label="Aktifkan tema Illustrator Slim" type="button"><i class="fas fa-pen-nib" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- WORKFLOW STEPPER -->
+      <div class="stepper" id="workflowStepper">
+        <button class="step" data-step="1" onclick="switchView('text')" type="button">
+          <div class="step-num">1</div>
+          <div class="step-info"><h4>Impor Data</h4><p id="stepImporInfo">Tempel teks / unggah file</p></div>
+        </button>
+        <div class="step-arrow"><i class="fas fa-chevron-right"></i></div>
+        <button class="step" data-step="2" onclick="switchView('text')" type="button">
+          <div class="step-num">2</div>
+          <div class="step-info"><h4>Periksa &amp; Edit</h4><p id="stepEditInfo">Belum ada data</p></div>
+        </button>
+        <div class="step-arrow"><i class="fas fa-chevron-right"></i></div>
+        <button class="step" data-step="3" onclick="switchView('label')" type="button">
+          <div class="step-num">3</div>
+          <div class="step-info"><h4>Desain Label</h4><p id="stepDesainInfo">Ukuran, font &amp; template</p></div>
+        </button>
+        <div class="step-arrow"><i class="fas fa-chevron-right"></i></div>
+        <button class="step" data-step="4" onclick="switchView('label')" type="button">
+          <div class="step-num">4</div>
+          <div class="step-info"><h4>Cetak</h4><p id="stepCetakInfo">Preview lalu cetak</p></div>
+        </button>
+      </div>
+
+      <section class="workspace-overview">
+        <div class="workspace-hero">
+          <div class="workspace-copy">
+            <span class="workspace-eyebrow">CEP Illustrator Workspace</span>
+            <h2>UI kerja yang lebih rapi, fokus, dan nyaman dibaca.</h2>
+            <p>Semua alur utama tetap dipertahankan, tapi sekarang dipresentasikan sebagai control room yang lebih modern, ringkas, dan kontras tinggi untuk sesi kerja panjang.</p>
+          </div>
+          <div class="workspace-quick-actions">
+            <button class="btn btn-outline btn-sm" onclick="switchView('text')" type="button">
+              <i class="fas fa-file-alt"></i> Fokus Data
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="switchView('label')" type="button">
+              <i class="fas fa-palette"></i> Fokus Preview
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openSettings()" type="button">
+              <i class="fas fa-sliders-h"></i> Pengaturan Workspace
+            </button>
+          </div>
+        </div>
+        <div class="workspace-stats">
+          <div class="workspace-stat">
+            <span class="workspace-stat-label">Mode Aktif</span>
+            <strong id="workspaceMode">Text Manager</strong>
+            <small>Area kerja yang sedang dibuka</small>
+          </div>
+          <div class="workspace-stat">
+            <span class="workspace-stat-label">Tema Aktif</span>
+            <strong id="workspaceTheme">Light</strong>
+            <small>Sinkron dengan switch tema di header</small>
+          </div>
+          <div class="workspace-stat">
+            <span class="workspace-stat-label">Total Tamu</span>
+            <strong id="workspaceGuestCount">0</strong>
+            <small>Jumlah data yang siap diproses</small>
+          </div>
+          <div class="workspace-stat">
+            <span class="workspace-stat-label">Status Fokus</span>
+            <strong id="workspaceFocus">Belum ada data</strong>
+            <small>Seleksi, filter, atau halaman preview</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- TEXT MANAGER VIEW -->
+      <section id="viewText" class="view active">
+        <div class="workflow-shell workflow-shell-text">
+          <div class="view-intro">
+            <div>
+              <h2>Kelola Data Tamu Undangan</h2>
+              <p>Import dari WhatsApp, Excel, Word, atau CSV — rapikan otomatis, edit massal, lalu cetak label profesional.</p>
+            </div>
+            <div class="view-intro-icon"><i class="fas fa-users"></i></div>
+          </div>
+
+          <div class="section-preamble">
+            <div class="section-copy">
+              <span class="section-pill">Text Manager</span>
+              <h3>Input, review, dan edit massal dalam satu meja kerja.</h3>
+              <p>Panel kiri difokuskan untuk impor dan pembersihan, sementara panel kanan jadi area editorial untuk koreksi cepat dan operasi bulk.</p>
+            </div>
+            <div class="section-mini-stats">
+              <div class="mini-stat-card">
+                <span class="mini-stat-label">Data Siap</span>
+                <strong id="textSectionGuests">0 tamu</strong>
+              </div>
+              <div class="mini-stat-card">
+                <span class="mini-stat-label">Seleksi Aktif</span>
+                <strong id="textSectionSelected">0 baris</strong>
+              </div>
+              <div class="mini-stat-card">
+                <span class="mini-stat-label">Filter</span>
+                <strong id="textSectionFilter">Semua baris</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-grid">
+
+            <!-- Input Panel -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  Import Data Tamu
+                </div>
+                <span class="badge" id="totalBadge">
+                  <i class="fas fa-users"></i> 0 tamu
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Tempel data dari WhatsApp / Excel / Word</label>
+                  <div class="chip-row" style="margin-bottom:8px;">
+                    <button class="chip-btn active" id="importModeClean" onclick="setImportMode('clean')" type="button">
+                      <span><i class="fas fa-magic"></i> Bersihkan Otomatis</span><small>gabung baris, hapus noise</small>
+                    </button>
+                    <button class="chip-btn" id="importModeRaw" onclick="setImportMode('raw')" type="button">
+                      <span><i class="fas fa-align-left"></i> Mentah</span><small>1 baris = 1 data</small>
+                    </button>
+                  </div>
+                  <textarea id="rawInput" placeholder="Contoh:&#10;Kepada Yth&#10;Bpk Ahmad Subagyo&#10;Jl. Mawar No 12&#10;Di Tempat"></textarea>
+                  <label class="checkbox-label" style="margin-top:8px;">
+                    <input type="checkbox" id="allowDuplicateImport">
+                    <span>Izinkan nama duplikat saat impor (tidak dilewati sebagai duplikat)</span>
+                  </label>
+                  <div class="form-hint" id="importModeHint">
+                    <i class="fas fa-info-circle"></i>
+                    Pisahkan tiap tamu dengan baris kosong (atau baris "Di"/"Tempat"). Sistem menghapus "Kepada Yth", nomor urut, bullet, dan merapikan spasi — nama bergelar dengan koma tetap utuh
+                  </div>
+                </div>
+
+                <div class="settings-row" style="margin-bottom:8px;">
+                  <div>
+                    <label class="settings-label">Teks "Di"</label>
+                    <input type="text" id="diText" value="Di" oninput="saveBoilerplate()">
+                  </div>
+                  <div>
+                    <label class="settings-label">Teks "Alamat"</label>
+                    <input type="text" id="alamatBoilerplate" value="Tempat" oninput="saveBoilerplate()">
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
+                  <button class="btn btn-sm btn-outline" onclick="applyBoilerplateToAll()" style="flex-shrink:0;">
+                    <i class="fas fa-sync-alt"></i> Terapkan ke Semua Data
+                  </button>
+                </div>
+                <div class="form-hint" style="margin-bottom:8px;">
+                  <i class="fas fa-lightbulb" style="color:var(--warning);"></i>
+                  Nilai default ini dipakai saat data baru ditambahkan (teks tempel, file, atau tombol "Tambah") dan tersimpan otomatis. Tombol di atas menerapkannya ke data yang sudah ada di tabel.
+                </div>
+
+                <div class="divider-or"><span>atau unggah file</span></div>
+
+                <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Unggah file data tamu">
+                  <div class="icon">📁</div>
+                  <h3>Tarik file ke sini</h3>
+                  <p>Excel, Word, CSV, atau TXT — tabel dengan judul kolom (Nama / Jabatan / Alamat) dideteksi otomatis dan langsung diimpor</p>
+                  <input type="file" id="fileInput" accept=".xlsx,.xls,.docx,.csv,.txt" multiple>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:10px;margin-top:18px;">
+                  <button class="btn btn-primary" onclick="processData()" style="width:100%;">
+                    <i class="fas fa-magic"></i> Proses &amp; Rapikan Data
+                  </button>
+                  <button class="btn btn-outline" onclick="loadSample()" style="width:100%;">
+                    <i class="fas fa-file-alt"></i> Lihat Contoh Data
+                  </button>
+                </div>
+
+                <div class="stats-grid">
+                  <div class="stat-card">
+                    <div class="stat-value success" id="statAccepted">0</div>
+                    <div class="stat-label">Diterima</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value" id="statFixed">0</div>
+                    <div class="stat-label">Diperbaiki</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value warning" id="statDuplicate">0</div>
+                    <div class="stat-label">Duplikat</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="stat-value danger" id="statTrash">0</div>
+                    <div class="stat-label">Dihapus</div>
+                  </div>
+                </div>
+                <div style="text-align:right;margin-top:8px;">
+                  <button class="toolbar-btn" onclick="resetStats()" style="font-size:11px;padding:5px 10px;display:inline-flex;">
+                    <i class="fas fa-redo-alt"></i> Reset Statistik
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Editor Panel -->
+            <div class="card editor-card">
+              <div class="card-header editor-card-header">
+                <div class="card-title">
+                  <i class="fas fa-edit"></i>
+                  <div class="editor-title-wrap">
+                    <span class="editor-main-title">Editor Data</span>
+                    <small class="editor-subtitle">Periksa, pilih, dan rapikan daftar tamu undangan</small>
+                  </div>
+                </div>
+                <div class="editor-header-actions">
+                  <div class="editor-header-count">
+                    <i class="fas fa-users"></i>
+                    <span class="ehc-num" id="ehcNum">0</span>
+                    <span class="ehc-label">tamu</span>
+                  </div>
+                  <button class="btn btn-sm btn-primary editor-add-btn" onclick="addNewEntry()" type="button">
+                    <i class="fas fa-plus"></i> Tambah Data
+                  </button>
+                  <button class="btn btn-sm btn-outline editor-clear-btn" onclick="clearAll()" type="button" title="Hapus SEMUA data tamu (tidak bisa di-undo sebagian)">
+                    <i class="fas fa-trash-alt"></i> Bersihkan
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+
+              <!-- ========== TOOLBAR: AKSI CEPAT ========== -->
+              <div class="editor-tools">
+                <div class="toolbar editor-toolbar">
+
+                  <div class="toolbar-group tg-select">
+                    <div class="tg-head">
+                      <i class="fas fa-check-double"></i>
+                      <span>Seleksi</span>
+                    </div>
+                    <div class="tg-buttons">
+                      <button class="toolbar-btn tb-info" onclick="selectAllRows()" type="button"><i class="fas fa-check-square"></i> Pilih Semua</button>
+                      <button class="toolbar-btn tb-ghost" onclick="deselectAll()" type="button"><i class="fas fa-times"></i> Batal</button>
+                    </div>
+                  </div>
+
+                  <div class="toolbar-group tg-edit">
+                    <div class="tg-head">
+                      <i class="fas fa-edit"></i>
+                      <span>Edit</span>
+                    </div>
+                    <div class="tg-buttons">
+                      <button class="toolbar-btn tb-success" onclick="duplicateSelected()" id="btnDup" type="button"><i class="fas fa-copy"></i> Duplikat</button>
+                      <button class="toolbar-btn tb-warning" onclick="mergeSelected()" id="btnMerge" type="button" title="Gabungkan baris terpilih jadi satu data"><i class="fas fa-object-group"></i> Gabung</button>
+                      <button class="toolbar-btn tb-danger" onclick="deleteSelected()" id="btnDel" type="button" title="Hapus baris yang dicentang"><i class="fas fa-trash-alt"></i> Hapus</button>
+                    </div>
+                  </div>
+
+                  <div class="toolbar-group tg-order">
+                    <div class="tg-head">
+                      <i class="fas fa-sort"></i>
+                      <span>Urutan</span>
+                    </div>
+                    <div class="tg-buttons">
+                      <button class="toolbar-btn" onclick="moveSelected(-1)" type="button" title="Pindahkan terpilih ke atas"><i class="fas fa-arrow-up"></i> Naik</button>
+                      <button class="toolbar-btn" onclick="moveSelected(1)" type="button" title="Pindahkan terpilih ke bawah"><i class="fas fa-arrow-down"></i> Turun</button>
+                    </div>
+                  </div>
+
+                  <div class="toolbar-group tg-mergeauto">
+                    <div class="tg-head">
+                      <i class="fas fa-layer-group"></i>
+                      <span>Gabung Otomatis</span>
+                    </div>
+                    <div class="tg-buttons">
+                      <button class="toolbar-btn tb-warning" onclick="autoMergeAdjacentPairs()" id="btnAutoMergePairs" type="button" title="Gabungkan SELURUH tabel per 2 baris berurutan (1+2, 3+4, dst)"><i class="fas fa-magic"></i> Gabung per 2 baris</button>
+                    </div>
+                  </div>
+
+                  <div class="toolbar-group tg-io">
+                    <div class="tg-head">
+                      <i class="fas fa-exchange-alt"></i>
+                      <span>Import / Export</span>
+                    </div>
+                    <div class="tg-buttons">
+                      <button class="toolbar-btn tb-success" onclick="document.getElementById('importFile').click()" type="button"><i class="fas fa-file-import"></i> Impor</button>
+                      <button class="toolbar-btn tb-info" onclick="exportData('json')" type="button">JSON</button>
+                      <button class="toolbar-btn tb-info" onclick="exportData('csv')" type="button">CSV</button>
+                      <button class="toolbar-btn tb-info" onclick="exportData('xlsx')" type="button">Excel</button>
+                      <input type="file" id="importFile" style="display:none" accept=".json,.csv,.xlsx" onchange="importData(this)">
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="editor-search">
+                  <div class="es-icon"><i class="fas fa-search"></i></div>
+                  <div class="es-field">
+                    <label for="tableSearch">Pencarian Cepat</label>
+                    <input type="text" id="tableSearch" placeholder="Ketik nama, jabatan, atau alamat untuk memfilter baris…" oninput="filterRows(this.value)" autocomplete="off">
+                  </div>
+                  <div class="es-hint" id="esHint">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="esHintText">Semua baris ditampilkan</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ========== TABEL DATA ========== -->
+              <div class="table-wrap">
+                <div class="table-subhead">
+                  <div class="ts-title"><i class="fas fa-table"></i> Daftar Tamu</div>
+                  <div class="ts-count" id="tsCount">Total: <b>0</b> baris</div>
+                </div>
+                <div class="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style="width:38px;"><input type="checkbox" onchange="toggleSelectAll(this)" style="width:16px;height:16px;" aria-label="Pilih semua baris"></th>
+                        <th style="width:40px;">No</th>
+                        <th style="min-width:220px;"><i class="fas fa-user"></i> Nama Tamu</th>
+                        <th style="min-width:150px;"><i class="fas fa-briefcase"></i> Jabatan / Keluarga</th>
+                        <th style="width:58px;">Di</th>
+                        <th style="min-width:160px;"><i class="fas fa-map-marker-alt"></i> Alamat</th>
+                        <th style="min-width:110px;"><i class="fas fa-sticky-note"></i> Keterangan</th>
+                        <th style="width:110px;"><i class="fas fa-cogs"></i> Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="entriesTable">
+                      <tr><td colspan="8" class="empty-state"><div class="empty-state-icon">🍃</div><h3>Belum ada data tamu</h3><p>Gunakan panel sebelah kiri untuk import data, atau klik <b>"Tambah Data"</b> di atas untuk input manual.</p></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- ========== EDIT MASSAL (ACCORDION) ========== -->
+              <div class="editor-accordion">
+                <button class="ea-header active" onclick="toggleEditorAccordion(this, 'eaBulk')" type="button" aria-expanded="true">
+                  <div class="ea-title">
+                    <span class="ea-icon ea-icon-bulk"><i class="fas fa-layer-group"></i></span>
+                    <div>
+                      <div class="ea-name">Edit Massal</div>
+                      <div class="ea-desc">Terapkan satu nilai ke banyak baris sekaligus</div>
+                    </div>
+                  </div>
+                  <div class="ea-meta">
+                    <span class="ea-chip ea-chip-info" id="eaBulkChip">Pilih baris dulu</span>
+                    <i class="fas fa-chevron-down ea-arrow"></i>
+                  </div>
+                </button>
+                <div class="ea-content ea-content-bulk" id="eaBulk">
+                  <div class="ea-form-grid">
+                    <div class="ea-form-cell">
+                      <label class="ea-label">Nilai yang akan diterapkan</label>
+                      <input type="text" id="bulkValue" placeholder="Contoh: Keluarga Besar, Di Tempat, dll.">
+                    </div>
+                    <div class="ea-form-cell ea-form-cell-sm">
+                      <label class="ea-label">Target Kolom</label>
+                      <select id="bulkField">
+                        <option value="jabatan">💼 Jabatan</option>
+                        <option value="di">📍 Di</option>
+                        <option value="alamat">🏠 Alamat</option>
+                        <option value="keterangan">📝 Keterangan</option>
+                        <option value="nama">👤 Nama</option>
+                      </select>
+                    </div>
+                    <div class="ea-form-cell ea-form-cell-btn">
+                      <label class="ea-label">&nbsp;</label>
+                      <button class="btn btn-primary btn-sm ea-apply-btn" onclick="applyBulk()">
+                        <i class="fas fa-check-double"></i> Terapkan ke Terpilih
+                      </button>
+                    </div>
+                  </div>
+                  <div class="ea-hint">
+                    <i class="fas fa-lightbulb"></i>
+                    <span><b>Cara pakai:</b> Centang satu atau beberapa baris di tabel (pakai tombol <b>"Pilih Semua"</b> jika perlu) → isi nilai → pilih kolom → klik <b>"Terapkan"</b>.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ========== ALAT BANTU TEKS (ACCORDION) ========== -->
+              <div class="editor-accordion">
+                <button class="ea-header active" onclick="toggleEditorAccordion(this, 'eaTools')" type="button" aria-expanded="true">
+                  <div class="ea-title">
+                    <span class="ea-icon ea-icon-tools"><i class="fas fa-toolbox"></i></span>
+                    <div>
+                      <div class="ea-name">Alat Bantu Teks</div>
+                      <div class="ea-desc">Cari &amp; ganti, atur kapital, awalan nama, urut, dan bersihkan data</div>
+                    </div>
+                  </div>
+                  <div class="ea-meta">
+                    <span class="ea-chip">5 alat tersedia</span>
+                    <i class="fas fa-chevron-down ea-arrow"></i>
+                  </div>
+                </button>
+                <div class="ea-content ea-content-tools" id="eaTools">
+
+                  <!-- Sub Bagian 1: Cari & Ganti -->
+                  <div class="ea-subsection">
+                    <div class="ea-subtitle"><i class="fas fa-exchange-alt text-accent"></i> 1. Cari &amp; Ganti Teks</div>
+                    <div class="ea-subgrid-4">
+                      <div>
+                        <label class="ea-label">Cari teks…</label>
+                        <input type="text" id="frFind" placeholder="Contoh: Jln., Jl, Yth">
+                      </div>
+                      <div>
+                        <label class="ea-label">Ganti dengan…</label>
+                        <input type="text" id="frReplace" placeholder="Contoh: Jl., (kosongkan untuk hapus)">
+                      </div>
+                      <div>
+                        <label class="ea-label">Cari di Kolom</label>
+                        <select id="frField">
+                          <option value="semua">🗂️ Semua Kolom</option>
+                          <option value="nama">👤 Nama</option>
+                          <option value="jabatan">💼 Jabatan</option>
+                          <option value="di">📍 Di</option>
+                          <option value="alamat">🏠 Alamat</option>
+                          <option value="keterangan">📝 Keterangan</option>
+                        </select>
+                      </div>
+                      <div class="ea-align-end">
+                        <label class="ea-label">&nbsp;</label>
+                        <button class="btn btn-primary btn-sm" onclick="doFindReplace()">
+                          <i class="fas fa-exchange-alt"></i> Ganti Semua
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Sub Bagian 2: Kapitalisasi -->
+                  <div class="ea-subsection">
+                    <div class="ea-subtitle"><i class="fas fa-font text-accent"></i> 2. Atur Kapitalisasi Huruf</div>
+                    <div class="ea-subrow">
+                      <div class="ea-subrow-cell">
+                        <label class="ea-label">Terapkan ke kolom</label>
+                        <select id="caseField" style="min-width:150px;">
+                          <option value="nama">👤 Nama</option>
+                          <option value="jabatan">💼 Jabatan</option>
+                          <option value="alamat">🏠 Alamat</option>
+                          <option value="keterangan">📝 Keterangan</option>
+                        </select>
+                      </div>
+                      <div class="ea-subrow-cell ea-pill-group">
+                        <label class="ea-label">Format</label>
+                        <div class="ea-pills">
+                          <button class="ea-pill" onclick="changeCase('title')" title="Setiap Kata Diawali Huruf Besar"><i class="fas fa-heading"></i> Title Case</button>
+                          <button class="ea-pill ea-pill-strong" onclick="changeCase('upper')" title="SEMUA HURUF BESAR"><i class="fas fa-font"></i> UPPERCASE</button>
+                          <button class="ea-pill ea-pill-soft" onclick="changeCase('lower')" title="semua huruf kecil"><i class="fas fa-paragraph"></i> lowercase</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Sub Bagian 3: Awalan Nama -->
+                  <div class="ea-subsection">
+                    <div class="ea-subtitle"><i class="fas fa-tag text-accent"></i> 3. Tambah / Hapus Awalan Nama</div>
+                    <div class="ea-subrow ea-subrow-wrap">
+                      <div class="ea-preset-group">
+                        <label class="ea-label">Preset Cepat</label>
+                        <div class="ea-chip-row">
+                          <button class="ea-chip-btn ea-chip-add" onclick="addNamePrefix('Bpk.')"><i class="fas fa-plus"></i> Bpk.</button>
+                          <button class="ea-chip-btn ea-chip-add" onclick="addNamePrefix('Ibu')"><i class="fas fa-plus"></i> Ibu</button>
+                          <button class="ea-chip-btn ea-chip-add" onclick="addNamePrefix('Sdr.')"><i class="fas fa-plus"></i> Sdr.</button>
+                          <button class="ea-chip-btn ea-chip-add" onclick="addNamePrefix('Sdri.')"><i class="fas fa-plus"></i> Sdri.</button>
+                          <button class="ea-chip-btn ea-chip-add" onclick="addNamePrefix('Kel.')"><i class="fas fa-plus"></i> Kel.</button>
+                          <button class="ea-chip-btn ea-chip-rm" onclick="removeNamePrefix()" title="Hapus awalan Bpk./Ibu/Sdr./Sdri./Kel."><i class="fas fa-eraser"></i> Hapus Preset</button>
+                        </div>
+                      </div>
+                      <div class="ea-custom-prefix">
+                        <label class="ea-label">Awalan Kustom</label>
+                        <div class="ea-custom-row">
+                          <input type="text" id="customPrefixInput" placeholder="Ketik awalan bebas… (contoh: Yth.)" style="min-width:180px;">
+                          <button class="btn btn-sm btn-outline" onclick="addCustomPrefix()" title="Tambahkan sebagai awalan nama"><i class="fas fa-plus"></i> Tambah</button>
+                          <button class="btn btn-sm btn-outline" onclick="removeCustomPrefix()" title="Hapus teks ini dari awal nama jika cocok"><i class="fas fa-eraser"></i> Hapus</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Sub Bagian 4: Urut & Bersihkan -->
+                  <div class="ea-subsection ea-subsection-last">
+                    <div class="ea-subtitle"><i class="fas fa-magic text-accent"></i> 4. Urutkan &amp; Bersihkan Data</div>
+                    <div class="ea-action-grid">
+                      <button class="ea-action" onclick="sortEntries(1)">
+                        <span class="ea-action-icon ea-icon-az"><i class="fas fa-sort-alpha-down"></i></span>
+                        <span class="ea-action-name">Urutkan A → Z</span>
+                        <span class="ea-action-desc">Berdasarkan kolom Nama</span>
+                      </button>
+                      <button class="ea-action" onclick="sortEntries(-1)">
+                        <span class="ea-action-icon ea-icon-za"><i class="fas fa-sort-alpha-up"></i></span>
+                        <span class="ea-action-name">Urutkan Z → A</span>
+                        <span class="ea-action-desc">Berdasarkan kolom Nama</span>
+                      </button>
+                      <button class="ea-action" onclick="cleanSpacesAll()">
+                        <span class="ea-action-icon ea-icon-clean"><i class="fas fa-broom"></i></span>
+                        <span class="ea-action-name">Rapikan Spasi</span>
+                        <span class="ea-action-desc">Hapus spasi ganda &amp; tepi</span>
+                      </button>
+                      <button class="ea-action ea-action-warn" onclick="removeDuplicateNames()">
+                        <span class="ea-action-icon ea-icon-dup"><i class="fas fa-clone"></i></span>
+                        <span class="ea-action-name">Hapus Duplikat</span>
+                        <span class="ea-action-desc">Nama sama → sisakan satu</span>
+                      </button>
+                      <button class="ea-action" onclick="checkLongNames()">
+                        <span class="ea-action-icon ea-icon-long"><i class="fas fa-text-width"></i></span>
+                        <span class="ea-action-name">Cek Nama Panjang</span>
+                        <span class="ea-action-desc">Cari nama yang melebihi label</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="ea-hint ea-hint-tools">
+                    <i class="fas fa-info-circle"></i>
+                    <span><b>Catatan:</b> Semua alat di atas bekerja pada <b>baris yang terpilih</b> (dicentang). Jika tidak ada yang dicentang, perubahan berlaku untuk <b>SELURUH data</b> di tabel. Selalu bisa <b>Ctrl+Z</b> (Undo) bila salah langkah.</span>
+                  </div>
+                </div>
+              </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LABEL MAKER VIEW -->
+      <section id="viewLabel" class="view">
+        <div class="workflow-shell workflow-shell-label">
+          <div class="view-intro">
+            <div>
+              <h2>Desain &amp; Cetak Label</h2>
+              <p>Atur ukuran kertas, tipografi, template, lalu preview real-time sebelum mencetak.</p>
+            </div>
+            <div class="view-intro-icon"><i class="fas fa-palette"></i></div>
+          </div>
+
+          <div class="section-preamble">
+            <div class="section-copy">
+              <span class="section-pill">Label Maker</span>
+              <h3>Panel desain terstruktur untuk setup cepat dan preview aman.</h3>
+              <p>Pengaturan dikumpulkan dalam sisi kiri yang lebih fokus, sedangkan area kanan dioptimalkan untuk preview, zoom, dan pengecekan layout sebelum cetak.</p>
+            </div>
+            <div class="section-mini-stats">
+              <div class="mini-stat-card">
+                <span class="mini-stat-label">Data Cetak</span>
+                <strong id="labelSectionGuests">0 tamu</strong>
+              </div>
+              <div class="mini-stat-card">
+                <span class="mini-stat-label">Halaman</span>
+                <strong id="labelSectionPages">1 / 1</strong>
+              </div>
+              <div class="mini-stat-card">
+                <span class="mini-stat-label">Template</span>
+                <strong id="labelSectionTemplate">Standar aktif</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="maker-grid">
+
+          <!-- Settings Panel -->
+          <div class="card settings-panel">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fas fa-cog"></i>
+                Pengaturan Label
+              </div>
+              <button class="btn btn-sm btn-outline" onclick="saveTemplate()">
+                <i class="fas fa-save"></i> Simpan
+              </button>
+            </div>
+            <div class="card-body">
+
+              <!-- Page Settings -->
+              <button class="accordion-header active" onclick="toggleAccordion(this)" type="button" aria-expanded="true">
+                <div class="settings-title" style="margin:0;">
+                  <i class="fas fa-ruler-combined"></i> Ukuran Halaman (Custom)
+                </div>
+                <i class="fas fa-chevron-down accordion-icon"></i>
+              </button>
+              <div class="accordion-content">
+                <div style="margin-bottom:14px;">
+                  <label class="settings-label">Preset Lembar Label (standar Indonesia)</label>
+                  <select id="labelPreset" onchange="applyLabelPreset(this.value)">
+                    <option value="">— Pilih preset label (opsional) —</option>
+                    <option value="103">No. 103 — 32×64 mm, 12 label/lembar (undangan)</option>
+                    <option value="121">No. 121 — 38×64 mm, 10 label/lembar (undangan)</option>
+                    <option value="127">No. 127 — 35×70 mm, 10 label/lembar</option>
+                    <option value="104">No. 104 — 24×75 mm, 16 label/lembar</option>
+                    <option value="107">No. 107 — 18×50 mm, 30 label/lembar</option>
+                    <option value="a4-2x5">A4 — 2×5 (10 label besar)</option>
+                    <option value="f4-2x5">F4/Folio — 2×5 (10 label besar)</option>
+                  </select>
+                  <div class="form-hint" style="margin-top:6px;">
+                    <i class="fas fa-info-circle"></i> Preset mengatur ukuran halaman, kolom/baris, margin &amp; jarak sekaligus. Sesuaikan margin bila posisi cetak meleset dari lembar label Anda.
+                  </div>
+                </div>
+                <div class="settings-row">
+                  <div>
+                    <label class="settings-label">Lebar (mm)</label>
+                    <input type="number" id="pageWidth" value="210" min="50" max="500" oninput="updatePreview()">
+                  </div>
+                  <div>
+                    <label class="settings-label">Tinggi (mm)</label>
+                    <input type="number" id="pageHeight" value="297" min="50" max="500" oninput="updatePreview()">
+                  </div>
+                </div>
+                <div class="settings-row">
+                  <div>
+                    <label class="settings-label">Kolom</label>
+                    <input type="number" id="labelCols" value="2" min="1" max="10" oninput="updatePreview()">
+                  </div>
+                  <div>
+                    <label class="settings-label">Baris</label>
+                    <input type="number" id="labelRows" value="5" min="1" max="20" oninput="updatePreview()">
+                  </div>
+                </div>
+                <div class="settings-row">
+                  <div>
+                    <label class="settings-label">Margin Atas (mm)</label>
+                    <input type="number" id="marginTop" value="12" min="0" max="100" oninput="updatePreview()">
+                  </div>
+                  <div>
+                    <label class="settings-label">Margin Kiri (mm)</label>
+                    <input type="number" id="marginLeft" value="8" min="0" max="100" oninput="updatePreview()">
+                  </div>
+                </div>
+                <div class="settings-row">
+                  <div>
+                    <label class="settings-label">Jarak Kolom (mm)</label>
+                    <input type="number" id="gapX" value="4" min="0" max="50" oninput="updatePreview()">
+                  </div>
+                  <div>
+                    <label class="settings-label">Jarak Baris (mm)</label>
+                    <input type="number" id="gapY" value="3" min="0" max="50" oninput="updatePreview()">
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <label class="settings-label">Padding Dalam Label (mm)</label>
+                  <div class="range-container">
+                    <input type="range" id="paddingRange" min="0" max="20" value="4" oninput="updatePadding(this.value)">
+                    <span class="range-value" id="paddingValue">4mm</span>
+                  </div>
+                  <div class="form-hint" style="margin-top:6px;">
+                    <i class="fas fa-info-circle"></i> Jarak antara tepi label dan teks di dalamnya — tidak mengubah posisi/ukuran label di lembar. 0mm = teks menempel di garis potong (berisiko terpotong saat digunting); 3–5mm disarankan.
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <label class="settings-label">Mulai Cetak dari Label ke-</label>
+                  <input type="number" id="startOffset" value="0" min="0" max="100" oninput="updatePreview()">
+                  <div class="form-hint" style="margin-top:6px;">
+                    <i class="fas fa-info-circle"></i> Untuk kertas bekas / sisa
+                  </div>
+                </div>
+              </div>
+
+              <!-- Typography Settings -->
+              <button class="accordion-header" onclick="toggleAccordion(this)" type="button" aria-expanded="false">
+                <div class="settings-title" style="margin:0;">
+                  <i class="fas fa-font"></i> Tipografi &amp; Format
+                </div>
+                <i class="fas fa-chevron-down accordion-icon"></i>
+              </button>
+              <div class="accordion-content" style="display:none;">
+                <div class="settings-row">
+                  <div>
+                    <label class="settings-label">Font Family</label>
+                    <select id="fontFamily" onchange="updatePreview()">
+                      <option value="Arial, sans-serif">Arial</option>
+                      <option value="'Times New Roman', serif">Times New Roman</option>
+                      <option value="Georgia, serif">Georgia</option>
+                      <option value="'Courier New', monospace">Courier New</option>
+                      <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                      <option value="Tahoma, sans-serif">Tahoma</option>
+                      <option value="Verdana, sans-serif">Verdana</option>
+                      <option value="'Comic Sans MS', cursive">Comic Sans</option>
+                      <option value="'Brush Script MT', cursive">Brush Script</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="settings-label">Ukuran (pt)</label>
+                    <input type="number" id="fontSize" value="11" min="6" max="72" oninput="updatePreview()">
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <label class="settings-label">Format Teks</label>
+                  <div class="format-toolbar">
+                    <button class="format-btn" id="btnBold" onclick="toggleFormat('bold')" title="Bold"><b>B</b></button>
+                    <button class="format-btn" id="btnItalic" onclick="toggleFormat('italic')" title="Italic"><i>I</i></button>
+                    <button class="format-btn" id="btnUnderline" onclick="toggleFormat('underline')" title="Underline"><u>U</u></button>
+                    <button class="format-btn" id="btnStrike" onclick="toggleFormat('strike')" title="Strikethrough"><s>S</s></button>
+                    <button class="format-btn" id="btnUppercase" onclick="toggleFormat('uppercase')" title="HURUF BESAR">AA</button>
+                    <button class="format-btn" id="btnSmallcaps" onclick="toggleFormat('smallcaps')" title="Small Caps">Aa</button>
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <label class="settings-label">Format Khusus Baris Nama — {nama}</label>
+                  <div class="format-toolbar" style="align-items:center;">
+                    <button class="format-btn" id="nsBold" onclick="toggleNameStyle('bold')" title="Nama Bold"><b>B</b></button>
+                    <button class="format-btn" id="nsItalic" onclick="toggleNameStyle('italic')" title="Nama Italic"><i>I</i></button>
+                    <button class="format-btn" id="nsUnderline" onclick="toggleNameStyle('underline')" title="Nama Underline"><u>U</u></button>
+                    <input type="color" id="nsColor" value="#000000" onchange="setNameColor(this.value)" title="Warna khusus nama" style="width:38px;height:38px;border:1px solid var(--border);border-radius:11px;cursor:pointer;padding:2px;background:var(--surface);">
+                    <button class="toolbar-btn" onclick="resetNameColor()" title="Kembali mengikuti warna teks label"><i class="fas fa-undo-alt"></i> Ikuti Label</button>
+                  </div>
+                  <div class="range-container" style="margin-top:10px;">
+                    <input type="range" id="nsScale" min="80" max="200" step="5" value="100" oninput="updateNameScale(this.value)">
+                    <span class="range-value" id="nsScaleValue">100%</span>
+                  </div>
+                  <div class="form-hint" style="margin-top:6px;">
+                    <i class="fas fa-info-circle"></i> Berlaku hanya pada placeholder {nama} di template — mis. nama lebih besar &amp; tebal dari baris lainnya
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <label class="settings-label">Warna Teks</label>
+                  <div class="color-picker">
+                    <button class="color-option active" style="background:#000000" onclick="setColor('#000000')" data-color="#000000" aria-label="Pilih warna hitam" type="button"></button>
+                    <button class="color-option" style="background:#1e293b" onclick="setColor('#1e293b')" data-color="#1e293b" aria-label="Pilih warna slate gelap" type="button"></button>
+                    <button class="color-option" style="background:#475569" onclick="setColor('#475569')" data-color="#475569" aria-label="Pilih warna slate" type="button"></button>
+                    <button class="color-option" style="background:#dc2626" onclick="setColor('#dc2626')" data-color="#dc2626" aria-label="Pilih warna merah" type="button"></button>
+                    <button class="color-option" style="background:#ea580c" onclick="setColor('#ea580c')" data-color="#ea580c" aria-label="Pilih warna oranye" type="button"></button>
+                    <button class="color-option" style="background:#059669" onclick="setColor('#059669')" data-color="#059669" aria-label="Pilih warna hijau" type="button"></button>
+                    <button class="color-option" style="background:#2563eb" onclick="setColor('#2563eb')" data-color="#2563eb" aria-label="Pilih warna biru" type="button"></button>
+                    <button class="color-option" style="background:#7c3aed" onclick="setColor('#7c3aed')" data-color="#7c3aed" aria-label="Pilih warna ungu" type="button"></button>
+                    <input type="color" id="customColor" value="#000000" onchange="setColor(this.value)" style="width:32px;height:32px;border:none;border-radius:10px;cursor:pointer;background:none;padding:0;">
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <label class="settings-label">Alignment</label>
+                  <div class="format-toolbar">
+                    <button class="format-btn active" data-align="left" onclick="setAlign('left', this)" title="Rata Kiri">L</button>
+                    <button class="format-btn" data-align="center" onclick="setAlign('center', this)" title="Rata Tengah">C</button>
+                    <button class="format-btn" data-align="right" onclick="setAlign('right', this)" title="Rata Kanan">R</button>
+                    <button class="format-btn" data-align="justify" onclick="setAlign('justify', this)" title="Rata Kiri-Kanan">J</button>
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <label class="settings-label">Line Height</label>
+                  <div class="range-container">
+                    <input type="range" id="lineHeightRange" min="0.8" max="3" step="0.1" value="1.4" oninput="updateLineHeight(this.value)">
+                    <span class="range-value" id="lineHeightValue">1.4</span>
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <label class="settings-label">Letter Spacing</label>
+                  <div class="range-container">
+                    <input type="range" id="letterSpacingRange" min="-2" max="10" step="0.5" value="0" oninput="updateLetterSpacing(this.value)">
+                    <span class="range-value" id="letterSpacingValue">0px</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Template Settings -->
+              <button class="accordion-header" onclick="toggleAccordion(this)" type="button" aria-expanded="false">
+                <div class="settings-title" style="margin:0;">
+                  <i class="fas fa-file-alt"></i> Template Label
+                </div>
+                <i class="fas fa-chevron-down accordion-icon"></i>
+              </button>
+              <div class="accordion-content" style="display:none;">
+                <div style="margin-bottom:14px;">
+                  <label class="settings-label">1. Pilih Template Siap Pakai</label>
+                  <select id="templatePreset" onchange="applyTemplatePreset(this.value)">
+                    <option value="">— Pilih preset (opsional) —</option>
+                    <option value="standar">Standar — Kepada Yth. + Nama + Jabatan</option>
+                    <option value="tanpaJabatan">Tanpa Jabatan — Kepada Yth. + Nama</option>
+                    <option value="sederhana">Sederhana — Nama saja + Di Tempat</option>
+                    <option value="lengkap">Lengkap — semua kolom + Keterangan</option>
+                    <option value="bernomor">Bernomor — No. urut di depan nama</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <span>2. Sesuaikan Format Teks Label</span>
+                    <button class="toolbar-btn" onclick="resetTemplate()" title="Kembalikan ke template bawaan" style="font-size:11px;padding:5px 10px;">
+                      <i class="fas fa-undo-alt"></i> Reset
+                    </button>
+                  </label>
+                  <textarea id="labelTemplate" rows="6" oninput="updatePreview()" style="min-height:130px;">Kepada Yth.
+{nama}
+{jabatan}
+{di}
+{alamat}</textarea>
+                  <label class="settings-label" style="margin-top:10px;">3. Klik untuk Sisipkan di Posisi Kursor</label>
+                  <div class="ph-chips">
+                    <button type="button" class="ph-chip" onclick="insertPlaceholder('{nama}')">{nama}</button>
+                    <button type="button" class="ph-chip" onclick="insertPlaceholder('{jabatan}')">{jabatan}</button>
+                    <button type="button" class="ph-chip" onclick="insertPlaceholder('{di}')">{di}</button>
+                    <button type="button" class="ph-chip" onclick="insertPlaceholder('{alamat}')">{alamat}</button>
+                    <button type="button" class="ph-chip" onclick="insertPlaceholder('{keterangan}')">{keterangan}</button>
+                    <button type="button" class="ph-chip" onclick="insertPlaceholder('{nomor}')">{nomor}</button>
+                    <button type="button" class="ph-chip ph-chip-blank" onclick="insertBlankLine()" title="Sisipkan satu baris kosong pada posisi kursor"><i class="fas fa-level-down-alt"></i> Baris kosong</button>
+                  </div>
+                  <div class="form-hint" style="margin-top:8px;">
+                    <i class="fas fa-info-circle"></i>
+                    Placeholder diganti otomatis dengan data tiap tamu. Baris data yang tidak terisi otomatis dilewati; gunakan <b>{baris-kosong}</b> untuk mempertahankan jarak kosong pada label.
+                  </div>
+                </div>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="showCutLines" checked onchange="updatePreview()">
+                  <span>Tampilkan garis bantu potong</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="showLabelNumber" onchange="updatePreview()">
+                  <span>Tampilkan nomor urut label</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="rotateText" onchange="updatePreview()">
+                  <span>Rotasi teks 90° (label vertikal)</span>
+                </label>
+              </div>
+
+              <!-- Advanced Settings -->
+              <button class="accordion-header" onclick="toggleAccordion(this)" type="button" aria-expanded="false">
+                <div class="settings-title" style="margin:0;">
+                  <i class="fas fa-sliders-h"></i> Pengaturan Lanjutan
+                </div>
+                <i class="fas fa-chevron-down accordion-icon"></i>
+              </button>
+              <div class="accordion-content" style="display:none;">
+                <div class="settings-row">
+                  <div>
+                    <label class="settings-label">Duplikat Setiap Label</label>
+                    <input type="number" id="duplicateCount" value="1" min="1" max="10" oninput="updatePreview()">
+                  </div>
+                  <div>
+                    <label class="settings-label">Border Radius (px)</label>
+                    <input type="number" id="borderRadius" value="0" min="0" max="50" oninput="updatePreview()">
+                  </div>
+                </div>
+                <label class="checkbox-label" style="margin-top:10px;">
+                  <input type="checkbox" id="autoSave" checked onchange="autoSaveIfEnabled(true)">
+                  <span>Auto-save perubahan</span>
+                </label>
+                <div class="form-hint" style="margin-top:8px;">
+                  <i class="fas fa-info-circle"></i> Data &amp; pengaturan otomatis tersimpan di browser ini dan akan dimuat kembali saat halaman dibuka ulang.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Panel -->
+          <div class="preview-panel">
+            <div class="preview-toolbar">
+              <div class="preview-controls">
+                <button class="btn btn-sm btn-outline" onclick="changePage(-1)">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <span id="pageInfo" style="font-weight:800;font-size:13.5px;padding:0 8px;">Halaman 1 / 1</span>
+                <button class="btn btn-sm btn-outline" onclick="changePage(1)">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+              <div class="preview-controls" style="gap:14px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;">Zoom</span>
+                  <input type="range" id="zoomSlider" min="0.3" max="1.5" step="0.05" value="0.7" style="width:130px;" oninput="updateZoom(this.value)">
+                  <span id="zoomValue" class="range-value">70%</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="doPrint()">
+                  <i class="fas fa-print"></i> Cetak
+                </button>
+              </div>
+            </div>
+
+            <div class="preview-area" id="previewContainer">
+              <div class="empty-state">
+                <div class="empty-state-icon">🏷️</div>
+                <h3>Tidak ada data</h3>
+                <p>Import data tamu di Text Manager terlebih dahulu</p>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <div class="badge"><i class="fas fa-ruler"></i> Label: <span id="labelSize">95 × 53 mm</span></div>
+              <div class="badge"><i class="fas fa-file-alt"></i> Halaman: <span id="totalPages">1</span></div>
+              <div class="badge"><i class="fas fa-tags"></i> Total Label: <span id="totalLabels">0</span></div>
+              <div class="badge" id="fitBadge" style="display:none;" onclick="showOverflowDetails()" title="Klik untuk detail"><i class="fas fa-check-circle"></i> <span id="fitBadgeText"></span></div>
+              <button class="btn btn-sm btn-outline" id="autoFitBtn" style="display:none;" onclick="autoFitFont()" title="Kecilkan font otomatis sampai semua teks muat">
+                <i class="fas fa-compress-alt"></i> Auto-Fit Font
+              </button>
+            </div>
+          </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal-header">
+      <div class="modal-title" id="settingsModalTitle"><i class="fas fa-cog"></i> Pengaturan Aplikasi</div>
+      <button class="modal-close" onclick="closeSettings()" title="Tutup" aria-label="Tutup pengaturan" type="button"><i class="fas fa-times" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">
+        <label class="settings-label" style="margin-bottom:10px;">Tampilan Tema</label>
+        <div class="chip-row">
+          <button class="chip-btn" id="themeModeLight" onclick="setThemeMode('light')"><span><i class="fas fa-sun"></i> Terang</span></button>
+          <button class="chip-btn" id="themeModeDark" onclick="setThemeMode('dark')"><span><i class="fas fa-moon"></i> Gelap</span></button>
+          <button class="chip-btn" id="themeModeGlass" onclick="setThemeMode('glass')"><span><i class="fas fa-gem"></i> Glass</span><small>frosted blur</small></button>
+          <button class="chip-btn" id="themeModeAi" onclick="setThemeMode('ai')"><span><i class="fas fa-pen-nib"></i> Illustrator Slim</span><small>panel #323232, padat</small></button>
+          <button class="chip-btn" id="themeModeSystem" onclick="setThemeMode('system')"><span><i class="fas fa-desktop"></i> Ikuti Sistem</span></button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <label class="settings-label" style="margin-bottom:10px;">Preset Ukuran Kertas — langsung diterapkan ke Label Maker</label>
+        <div class="chip-row" id="paperPresets">
+          <button class="chip-btn" onclick="applyPaperPreset(210,297,'A4')"><span>A4</span><small>210 × 297 mm</small></button>
+          <button class="chip-btn" onclick="applyPaperPreset(215,330,'F4 / Folio')"><span>F4 / Folio</span><small>215 × 330 mm</small></button>
+          <button class="chip-btn" onclick="applyPaperPreset(148,210,'A5')"><span>A5</span><small>148 × 210 mm</small></button>
+          <button class="chip-btn" onclick="applyPaperPreset(216,279,'Letter')"><span>Letter</span><small>216 × 279 mm</small></button>
+          <button class="chip-btn" onclick="applyPaperPreset(297,420,'A3')"><span>A3</span><small>297 × 420 mm</small></button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <label class="settings-label" style="margin-bottom:10px;">Backup &amp; Pulihkan — data tamu + seluruh pengaturan</label>
+        <div class="chip-row">
+          <button class="btn btn-sm btn-outline" onclick="exportBackup()"><i class="fas fa-download"></i> Unduh Backup (.json)</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('backupFile').click()"><i class="fas fa-upload"></i> Pulihkan dari Backup</button>
+          <input type="file" id="backupFile" style="display:none" accept=".json" onchange="importBackup(this)">
+        </div>
+        <div class="form-hint" style="margin-top:8px;">
+          <i class="fas fa-shield-alt"></i> Simpan file backup sebelum berpindah komputer/browser — semua data &amp; pengaturan bisa dipulihkan persis.
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <label class="settings-label" style="margin-bottom:10px;">Reset</label>
+        <div class="chip-row">
+          <button class="btn btn-sm btn-outline" onclick="resetSettingsDefault()"><i class="fas fa-undo-alt"></i> Reset Pengaturan Label</button>
+          <button class="btn btn-sm btn-danger" onclick="clearAllStorage()"><i class="fas fa-trash-alt"></i> Hapus Semua Data Tersimpan</button>
+        </div>
+        <div class="form-hint" style="margin-top:8px;">
+          <i class="fas fa-exclamation-triangle" style="color:var(--warning);"></i> "Reset Pengaturan" hanya mengembalikan pengaturan label ke bawaan (data tamu aman). "Hapus Semua" mengosongkan data tamu + pengaturan dari browser ini.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Print Area -->
+<div id="printArea"></div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ============================================================
+     MODUL JAVASCRIPT — plain <script> global (BUKAN ES module).
+     PENTING: semua fungsi harus tetap GLOBAL karena dipanggil dari
+     69 titik onclick="..."/onchange="..." di HTML, dan agar file
+     tetap bisa dibuka via double-click (file://) tanpa server.
+     URUTAN LOAD WAJIB DIPERTAHANKAN — app.js harus paling akhir.
+     ============================================================ -->
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/parser.js"></script>
+<script src="js/table.js"></script>
+<script src="js/import-export.js"></script>
+<script src="js/designer.js"></script>
+<script src="js/printing.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/app.js"></script>
+<!-- Jembatan Illustrator (CEP) — no-op di browser biasa, aktif hanya
+     saat folder ini dipasang sebagai extension panel di Illustrator. -->
+<script src="js/cep-bridge.js"></script>
+</body>
+</html>

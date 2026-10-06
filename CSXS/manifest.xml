@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ============================================================
+     manifest.xml — deklarasi extension CEP untuk Adobe Illustrator
+     Target: Illustrator 2021 (v25.x, CEP 11) ke atas.
+     Host "ILST" = Illustrator. Panel muncul di:
+     Window > Extensions > Label Undangan Studio
+     ============================================================ -->
+<ExtensionManifest Version="10.0"
+                   ExtensionBundleId="com.labelundangan.studio"
+                   ExtensionBundleVersion="1.0.0"
+                   ExtensionBundleName="Label Undangan Studio"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ExtensionList>
+    <Extension Id="com.labelundangan.studio.panel" Version="1.0.0"/>
+  </ExtensionList>
+  <ExecutionEnvironment>
+    <HostList>
+      <!-- 25.0 = Illustrator 2021. Batas atas longgar agar tetap jalan
+           di versi Illustrator yang lebih baru (selama CEP masih didukung). -->
+      <Host Name="ILST" Version="[25.0,99.9]"/>
+    </HostList>
+    <LocaleList><Locale Code="All"/></LocaleList>
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="10.0"/>
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+  <DispatchInfoList>
+    <Extension Id="com.labelundangan.studio.panel">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./index.html</MainPath>
+          <ScriptPath>./host/labelgen.jsx</ScriptPath>
+        </Resources>
+        <Lifecycle><AutoVisible>true</AutoVisible></Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>Label Undangan Studio</Menu>
+          <Geometry>
+            <Size><Width>1150</Width><Height>800</Height></Size>
+            <MinSize><Width>420</Width><Height>380</Height></MinSize>
+            <MaxSize><Width>3840</Width><Height>2160</Height></MaxSize>
+          </Geometry>
+          <!-- Ikon tab panel (mode collapse/icon di sisi kanan Illustrator).
+               Satu PNG dipakai untuk semua state; latar #383838 menyatu
+               dengan UI gelap Illustrator. -->
+          <Icons>
+            <Icon Type="Normal">./icons/panel-icon.png</Icon>
+            <Icon Type="RollOver">./icons/panel-icon.png</Icon>
+            <Icon Type="Disabled">./icons/panel-icon.png</Icon>
+            <Icon Type="DarkNormal">./icons/panel-icon.png</Icon>
+            <Icon Type="DarkRollOver">./icons/panel-icon.png</Icon>
+          </Icons>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>

@@ -1,0 +1,16 @@
+Windows Registry Editor Version 5.00
+
+; ============================================================
+; Aktifkan PlayerDebugMode untuk CEP 10 & 11 — WAJIB agar
+; Illustrator mau memuat extension yang belum ditandatangani
+; (unsigned). Cukup double-click file ini SEKALI, klik Yes,
+; lalu restart Illustrator.
+; Illustrator 2021 (25.x) memakai CSXS.11; CSXS.10 disertakan
+; untuk berjaga-jaga bila dipakai di Illustrator 2020.
+; ============================================================
+
+[HKEY_CURRENT_USER\Software\Adobe\CSXS.10]
+"PlayerDebugMode"="1"
+
+[HKEY_CURRENT_USER\Software\Adobe\CSXS.11]
+"PlayerDebugMode"="1"
