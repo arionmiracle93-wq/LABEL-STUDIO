@@ -17,8 +17,9 @@ label-studio/
 
 Tema ke-4 yang meniru panel Illustrator tema "Dark": latar **#323232**
 (disamakan dengan sampel warna UI Illustrator pengguna), kontrol kecil
-radius 4px, kepadatan tinggi (semua padding/font diperkecil), aksen biru
-seperti tema dark web. **Otomatis aktif** saat panel pertama kali dibuka di
+radius 4px, kepadatan tinggi (semua padding/font diperkecil), aksen rose
+mengikuti identitas aplikasi (kontras teks ≥ 4.5:1 di atas abu panel).
+**Otomatis aktif** saat panel pertama kali dibuka di
 dalam Illustrator (bila belum pernah memilih tema). Bisa diganti kapan pun
 lewat tombol tema (siklus: terang→gelap→glass→slim) atau modal Pengaturan.
 
