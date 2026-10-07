@@ -1,7 +1,7 @@
 /* ============================================================
-   theme.js — TEMA (Light / Dark / Glass)
-   Siklus tombol: light → dark → glass → light.
-   Mode "Ikuti Sistem" aktif bila tidak ada tema tersimpan.
+   theme.js — TEMA (Light / Dark / Glass / Illustrator Slim)
+   Siklus tombol: light → dark → glass → ai → light.
+   Browser mengikuti tema sistem bila belum dipilih; CEP mulai di tema ai.
    CATATAN: bootstrap anti-flash ada inline di <head> index.html.
    ============================================================ */
 
@@ -11,7 +11,11 @@ function getPreferredTheme() {
   try {
     const saved = localStorage.getItem('labelUndangan_theme');
     if (VALID_THEMES.includes(saved)) return saved;
+    if (saved === 'system') {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
   } catch (e) {}
+  if (window.__adobe_cep__) return 'ai';
   if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
   return 'light';
 }
@@ -47,8 +51,10 @@ if (window.matchMedia) {
     try { saved = localStorage.getItem('labelUndangan_theme'); } catch (err) {}
     // FIX: ikuti sistem HANYA bila tidak ada tema tersimpan sama sekali —
     // sebelumnya tema glass/ai ikut tertimpa saat preferensi OS berubah.
-    if (!VALID_THEMES.includes(saved)) {
+    if (saved === 'system') {
       applyTheme(e.matches ? 'dark' : 'light', false);
+    } else if (!VALID_THEMES.includes(saved)) {
+      applyTheme(window.__adobe_cep__ ? 'ai' : (e.matches ? 'dark' : 'light'), false);
     }
   });
 }
@@ -72,6 +78,6 @@ function pickTheme(ev, t) {
   setTimeout(() => document.documentElement.classList.remove('theme-animating'), 350);
 }
 
-// Apply theme ASAP to avoid flash — persist=false agar pengguna yang
-// belum pernah memilih tema tetap dalam mode "Ikuti Sistem".
+// Apply theme ASAP to avoid flash. A first-time CEP session starts in
+// Illustrator Slim; a browser session continues to follow the OS.
 applyTheme(getPreferredTheme(), false);

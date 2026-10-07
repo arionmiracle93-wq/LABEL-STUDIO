@@ -11,12 +11,12 @@
 (function () {
   if (!window.__adobe_cep__) return; // bukan di dalam Illustrator
 
-  // Saat berjalan di dalam Illustrator dan pengguna belum pernah memilih
-  // tema sendiri, otomatis pakai tema "ai" (Illustrator Slim #383838)
-  // agar panel menyatu dengan UI Illustrator.
+  // Mark the dockable layout and use Illustrator Slim on first launch.
+  // Explicitly chosen themes are preserved.
+  document.documentElement.classList.add('cep-panel');
   try {
     var savedTheme = localStorage.getItem('labelUndangan_theme');
-    if (savedTheme !== 'light' && savedTheme !== 'dark' && savedTheme !== 'glass' && savedTheme !== 'ai') {
+    if (savedTheme !== 'system' && savedTheme !== 'light' && savedTheme !== 'dark' && savedTheme !== 'glass' && savedTheme !== 'ai') {
       applyTheme('ai', false);
     }
   } catch (e) {}
