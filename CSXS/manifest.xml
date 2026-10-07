@@ -36,7 +36,7 @@
           <Type>Panel</Type>
           <Menu>Label Undangan Studio</Menu>
           <Geometry>
-            <Size><Width>1150</Width><Height>800</Height></Size>
+            <Size><Width>560</Width><Height>800</Height></Size>
             <MinSize><Width>420</Width><Height>380</Height></MinSize>
             <MaxSize><Width>3840</Width><Height>2160</Height></MaxSize>
           </Geometry>

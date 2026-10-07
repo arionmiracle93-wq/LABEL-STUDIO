@@ -15,13 +15,14 @@ label-studio/
 
 ### Tema "Illustrator Slim" 🖊️
 
-Tema ke-4 yang meniru panel Illustrator tema "Dark": latar **#323232**
-(disamakan dengan sampel warna UI Illustrator pengguna), kontrol kecil
-radius 4px, kepadatan tinggi (semua padding/font diperkecil), aksen rose
-mengikuti identitas aplikasi (kontras teks ≥ 4.5:1 di atas abu panel).
-**Otomatis aktif** saat panel pertama kali dibuka di
-dalam Illustrator (bila belum pernah memilih tema). Bisa diganti kapan pun
-lewat tombol tema (siklus: terang→gelap→glass→slim) atau modal Pengaturan.
+Tema ke-4 yang dirancang untuk panel Illustrator: latar graphite **#303535**,
+permukaan bertingkat, kontrol ringkas, dan aksen teal **#71DED1**.
+Teks utama, sekunder, dan status memakai warna yang tetap terbaca di atas
+permukaan gelap; tombol aksi memakai teal gelap dengan teks putih berkontras.
+**Otomatis aktif** saat panel pertama kali dibuka di dalam Illustrator (bila
+belum pernah memilih tema). Navigasi panel menyederhanakan alur menjadi
+**Data tamu** dan **Desain label**; ringkasan dan stepper duplikat disembunyikan.
+Tema tetap bisa diganti kapan pun lewat switch di header atau modal Pengaturan.
 
 Dibuka di browser biasa? Semua tetap berjalan seperti biasa — bagian CEP
 otomatis tidak aktif. Satu folder, dua cara pakai.

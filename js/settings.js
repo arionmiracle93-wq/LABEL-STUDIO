@@ -1,6 +1,6 @@
 /* ============================================================
    settings.js — MODAL PENGATURAN APLIKASI (tombol gear)
-   Mode tema (terang/gelap/glass/sistem), preset ukuran kertas,
+   Mode tema (terang/gelap/glass/Illustrator Slim/sistem), preset ukuran kertas,
    backup & pulihkan lengkap, dan reset.
    ============================================================ */
 
@@ -25,7 +25,7 @@ document.addEventListener('keydown', e => {
 // --- Tema: Terang / Gelap / Ikuti Sistem ---
 function setThemeMode(mode) {
   if (mode === 'system') {
-    try { localStorage.removeItem('labelUndangan_theme'); } catch (e) {}
+    try { localStorage.setItem('labelUndangan_theme', 'system'); } catch (e) {}
     const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     applyTheme(sysDark ? 'dark' : 'light', false);
     showToast('Tema mengikuti pengaturan sistem', 'success');
@@ -42,7 +42,9 @@ function setThemeMode(mode) {
 function updateThemeModeButtons() {
   let saved = null;
   try { saved = localStorage.getItem('labelUndangan_theme'); } catch (e) {}
-  const mode = VALID_THEMES.includes(saved) ? saved : 'system';
+  const mode = saved === 'system' ? 'system'
+    : VALID_THEMES.includes(saved) ? saved
+    : (window.__adobe_cep__ ? 'ai' : 'system');
   ['Light', 'Dark', 'Glass', 'Ai', 'System'].forEach(m => {
     const btn = document.getElementById('themeMode' + m);
     if (btn) btn.classList.toggle('active', mode === m.toLowerCase());

@@ -12,7 +12,10 @@ function switchView(view) {
   document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
 
   document.getElementById('view' + (view === 'text' ? 'Text' : 'Label')).classList.add('active');
-  document.getElementById('btn' + (view === 'text' ? 'Text' : 'Label')).classList.add('active');
+  const activeButton = document.getElementById('btn' + (view === 'text' ? 'Text' : 'Label'));
+  activeButton.classList.add('active');
+  activeButton.setAttribute('aria-pressed', 'true');
+  document.getElementById('btn' + (view === 'text' ? 'Label' : 'Text')).setAttribute('aria-pressed', 'false');
 
   if (view === 'label') updatePreview();
   updateStepper();

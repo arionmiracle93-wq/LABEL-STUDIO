@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id" data-theme="ai">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Label Undangan Studio — Professional Label Maker</title>
+<title>Label Undangan Studio — Panel Illustrator</title>
 
 <!-- ============================================================
      BOOTSTRAP TEMA (inline, anti flash-of-wrong-theme)
@@ -11,13 +11,18 @@
      ada di js/theme.js.
      ============================================================ -->
 <script>
-try {
-  var t = localStorage.getItem('labelUndangan_theme');
-  if (t !== 'dark' && t !== 'light' && t !== 'glass') {
+(function () {
+  var cepPanel = !!window.__adobe_cep__;
+  if (cepPanel) document.documentElement.classList.add('cep-panel');
+  var t = null;
+  try { t = localStorage.getItem('labelUndangan_theme'); } catch (e) {}
+  if (t === 'system') {
     t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  } else if (t !== 'dark' && t !== 'light' && t !== 'glass' && t !== 'ai') {
+    t = cepPanel ? 'ai' : ((window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
   }
   document.documentElement.setAttribute('data-theme', t);
-} catch (e) {}
+})();
 </script>
 
 <!-- ============================================================
@@ -45,7 +50,7 @@ try {
 <link rel="stylesheet" href="libs/fonts/inter.css"
       onerror="this.onerror=null;this.href='https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap'">
 
-<!-- Styling aplikasi (semua tema: light / dark / glass) -->
+<!-- Styling aplikasi (light / dark / glass / Illustrator Slim) -->
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -54,7 +59,7 @@ try {
 
   <!-- RAIL SIDEBAR -->
   <aside class="rail">
-    <div class="rail-logo">🏷️</div>
+    <div class="rail-logo"><i class="fas fa-tag" aria-hidden="true"></i></div>
     <div class="rail-sep"></div>
     <div class="rail-actions">
       <button class="icon-btn" onclick="undo()" title="Undo (Ctrl+Z)" aria-label="Undo" type="button"><i class="fas fa-undo" aria-hidden="true"></i></button>
@@ -63,7 +68,7 @@ try {
       <button class="icon-btn" onclick="doPrint()" title="Print (Ctrl+P)" aria-label="Cetak label" type="button"><i class="fas fa-print" aria-hidden="true"></i></button>
       <div class="rail-sep"></div>
       <button class="icon-btn" onclick="openSettings()" title="Pengaturan Aplikasi" aria-label="Buka pengaturan aplikasi" type="button"><i class="fas fa-cog" aria-hidden="true"></i></button>
-      <button class="icon-btn theme-toggle-rail" onclick="toggleTheme()" title="Ganti tema: Terang → Gelap → Glass" id="railThemeBtn" aria-label="Ganti tema cepat" type="button">
+      <button class="icon-btn theme-toggle-rail" onclick="toggleTheme()" title="Ganti tema tampilan" id="railThemeBtn" aria-label="Ganti tema cepat" type="button">
         <i class="fas fa-moon" id="railThemeIcon" aria-hidden="true"></i>
       </button>
     </div>
@@ -75,24 +80,24 @@ try {
     <header>
       <div class="header-content">
         <div class="logo">
-          <div class="logo-icon">🏷️</div>
+          <div class="logo-icon"><i class="fas fa-tag" aria-hidden="true"></i></div>
           <div>
             <h1>Label Undangan Studio</h1>
-            <p>Professional Wedding Label Design &amp; Print Tool</p>
+            <p>Panel Adobe Illustrator</p>
           </div>
         </div>
 
-        <div class="switch-container">
-          <button class="switch-btn active" onclick="switchView('text')" id="btnText">
-            <i class="fas fa-file-alt"></i> Text Manager
+        <div class="switch-container" role="group" aria-label="Pilih area kerja">
+          <button class="switch-btn active" onclick="switchView('text')" id="btnText" type="button" aria-pressed="true">
+            <i class="fas fa-address-book" aria-hidden="true"></i> Data tamu
           </button>
-          <button class="switch-btn" onclick="switchView('label')" id="btnLabel">
-            <i class="fas fa-palette"></i> Label Maker
+          <button class="switch-btn" onclick="switchView('label')" id="btnLabel" type="button" aria-pressed="false">
+            <i class="fas fa-vector-square" aria-hidden="true"></i> Desain label
           </button>
         </div>
 
         <div class="header-actions">
-          <div class="theme-switch" role="group" aria-label="Pilih tema tampilan" title="Pilih tema tampilan">
+          <div class="theme-switch" role="group" aria-label="Pilih tema tampilan" title="Tema tampilan">
             <div class="theme-switch-track">
               <div class="theme-switch-thumb" id="themeThumb"></div>
               <button class="theme-switch-opt active" id="themeOptLight" onclick="pickTheme(event,'light')" title="Tema Terang" aria-label="Aktifkan tema terang" type="button"><i class="fas fa-sun" aria-hidden="true"></i></button>
@@ -101,6 +106,9 @@ try {
               <button class="theme-switch-opt" id="themeOptAi" onclick="pickTheme(event,'ai')" title="Illustrator Slim" aria-label="Aktifkan tema Illustrator Slim" type="button"><i class="fas fa-pen-nib" aria-hidden="true"></i></button>
             </div>
           </div>
+          <button class="icon-btn header-settings-btn" onclick="openSettings()" title="Pengaturan" aria-label="Buka pengaturan" type="button">
+            <i class="fas fa-sliders-h" aria-hidden="true"></i>
+          </button>
         </div>
       </div>
     </header>
@@ -177,16 +185,16 @@ try {
           <div class="view-intro">
             <div>
               <h2>Kelola Data Tamu Undangan</h2>
-              <p>Import dari WhatsApp, Excel, Word, atau CSV — rapikan otomatis, edit massal, lalu cetak label profesional.</p>
+              <p>Tempel atau impor daftar tamu, rapikan datanya, lalu siapkan label untuk dicetak.</p>
             </div>
-            <div class="view-intro-icon"><i class="fas fa-users"></i></div>
+            <button class="view-intro-icon" onclick="showHelp()" title="Buka bantuan" aria-label="Buka bantuan" type="button"><i class="fas fa-question" aria-hidden="true"></i></button>
           </div>
 
           <div class="section-preamble">
             <div class="section-copy">
               <span class="section-pill">Text Manager</span>
-              <h3>Impor di kiri, editorial di kanan.</h3>
-              <p>Panel kiri untuk impor dan pembersihan data; panel kanan untuk koreksi cepat dan operasi massal.</p>
+              <h3>Daftar tamu</h3>
+              <p>Impor, periksa, dan rapikan data sebelum masuk ke desain label.</p>
             </div>
             <div class="section-mini-stats">
               <div class="mini-stat-card">
@@ -210,8 +218,8 @@ try {
             <div class="card">
               <div class="card-header">
                 <div class="card-title">
-                  <i class="fas fa-cloud-upload-alt"></i>
-                  Import Data Tamu
+                  <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                  Impor Data Tamu
                 </div>
                 <span class="badge" id="totalBadge">
                   <i class="fas fa-users"></i> 0 tamu
@@ -262,7 +270,7 @@ try {
                 <div class="divider-or"><span>atau unggah file</span></div>
 
                 <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Unggah file data tamu">
-                  <div class="icon">📁</div>
+                  <div class="icon"><i class="fas fa-cloud-upload-alt" aria-hidden="true"></i></div>
                   <h3>Tarik file ke sini</h3>
                   <p>Excel, Word, CSV, atau TXT — tabel dengan judul kolom (Nama / Jabatan / Alamat) dideteksi otomatis dan langsung diimpor</p>
                   <input type="file" id="fileInput" accept=".xlsx,.xls,.docx,.csv,.txt" multiple>
@@ -296,7 +304,7 @@ try {
                   </div>
                 </div>
                 <div style="text-align:right;margin-top:8px;">
-                  <button class="toolbar-btn" onclick="resetStats()" style="font-size:11px;padding:5px 10px;display:inline-flex;">
+                  <button class="toolbar-btn" onclick="resetStats()" style="font-size:12px;padding:6px 10px;display:inline-flex;">
                     <i class="fas fa-redo-alt"></i> Reset Statistik
                   </button>
                 </div>
@@ -332,6 +340,21 @@ try {
               <!-- ========== TOOLBAR: AKSI CEPAT ========== -->
               <div class="editor-tools">
                 <div class="toolbar editor-toolbar">
+
+                  <div class="toolbar-group tg-history">
+                    <div class="tg-head">
+                      <i class="fas fa-history" aria-hidden="true"></i>
+                      <span>Riwayat</span>
+                    </div>
+                    <div class="tg-buttons">
+                      <button class="toolbar-btn" onclick="undo()" type="button" title="Urungkan perubahan (Ctrl+Z)" aria-label="Urungkan perubahan">
+                        <i class="fas fa-undo" aria-hidden="true"></i> Urungkan
+                      </button>
+                      <button class="toolbar-btn" onclick="redo()" type="button" title="Ulangi perubahan (Ctrl+Y)" aria-label="Ulangi perubahan">
+                        <i class="fas fa-redo" aria-hidden="true"></i> Ulangi
+                      </button>
+                    </div>
+                  </div>
 
                   <div class="toolbar-group tg-select">
                     <div class="tg-head">
@@ -628,16 +651,16 @@ try {
           <div class="view-intro">
             <div>
               <h2>Desain &amp; Cetak Label</h2>
-              <p>Atur ukuran kertas, tipografi, template, lalu preview real-time sebelum mencetak.</p>
+              <p>Atur ukuran dan tipografi. Periksa preview sebelum membuat label vektor di Illustrator.</p>
             </div>
-            <div class="view-intro-icon"><i class="fas fa-palette"></i></div>
+            <button class="view-intro-icon" onclick="showHelp()" title="Buka bantuan" aria-label="Buka bantuan" type="button"><i class="fas fa-question" aria-hidden="true"></i></button>
           </div>
 
           <div class="section-preamble">
             <div class="section-copy">
               <span class="section-pill">Label Maker</span>
-              <h3>Pengaturan di kiri, preview di kanan.</h3>
-              <p>Atur ukuran dan tipografi, lalu periksa tata letak lewat preview sebelum mencetak atau mengirim ke Illustrator.</p>
+              <h3>Atur lalu periksa hasilnya</h3>
+              <p>Sesuaikan ukuran, tipografi, dan template. Buat teks vektor langsung di dokumen Illustrator.</p>
             </div>
             <div class="section-mini-stats">
               <div class="mini-stat-card">
@@ -870,7 +893,7 @@ try {
                 <div class="form-group">
                   <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
                     <span>2. Sesuaikan Format Teks Label</span>
-                    <button class="toolbar-btn" onclick="resetTemplate()" title="Kembalikan ke template bawaan" style="font-size:11px;padding:5px 10px;">
+                    <button class="toolbar-btn" onclick="resetTemplate()" title="Kembalikan ke template bawaan" style="font-size:12px;padding:6px 10px;">
                       <i class="fas fa-undo-alt"></i> Reset
                     </button>
                   </label>
@@ -951,7 +974,7 @@ try {
               </div>
               <div class="preview-controls" style="gap:14px;">
                 <div style="display:flex;align-items:center;gap:10px;">
-                  <span style="font-size:11px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;">Zoom</span>
+                  <span style="font-size:12px;font-weight:600;color:var(--text-muted);">Zoom</span>
                   <input type="range" id="zoomSlider" min="0.3" max="1.5" step="0.05" value="0.7" style="width:130px;" oninput="updateZoom(this.value)">
                   <span id="zoomValue" class="range-value">70%</span>
                 </div>
@@ -1001,7 +1024,7 @@ try {
           <button class="chip-btn" id="themeModeLight" onclick="setThemeMode('light')"><span><i class="fas fa-sun"></i> Terang</span></button>
           <button class="chip-btn" id="themeModeDark" onclick="setThemeMode('dark')"><span><i class="fas fa-moon"></i> Gelap</span></button>
           <button class="chip-btn" id="themeModeGlass" onclick="setThemeMode('glass')"><span><i class="fas fa-gem"></i> Glass</span><small>frosted blur</small></button>
-          <button class="chip-btn" id="themeModeAi" onclick="setThemeMode('ai')"><span><i class="fas fa-pen-nib"></i> Illustrator Slim</span><small>panel #323232, padat</small></button>
+          <button class="chip-btn" id="themeModeAi" onclick="setThemeMode('ai')"><span><i class="fas fa-pen-nib"></i> Illustrator Slim</span><small>panel #303535, padat</small></button>
           <button class="chip-btn" id="themeModeSystem" onclick="setThemeMode('system')"><span><i class="fas fa-desktop"></i> Ikuti Sistem</span></button>
         </div>
       </div>

@@ -1,263 +1,116 @@
 /* ============================================================
    LABEL UNDANGAN STUDIO — styles.css
-   Redesign "Meja Cetak" — identitas studio cetak label undangan.
-   4 tema: light (Kertas), dark (Tinta), glass (Kaca), ai
-   (Illustrator Slim). Semua token dipertahankan agar markup &
-   JS yang ada tetap berfungsi tanpa perubahan.
+   Illustrator label workspace — graphite surfaces, accessible teal,
+   and compact controls that adapt to the docked CEP panel.
    ============================================================ */
 
-/* =========================================================
-   DESIGN TOKENS — LIGHT "KERTAS"
-   Kertas netral sejuk + aksen "lak" (merah-marun segel
-   undangan). Semua teks sekunder ≥ 4.5:1 di atas surface.
-   ========================================================= */
+/* ============================================================
+   DESIGN TOKENS — STUDIO TEAL
+   Palette inspired by a working Illustrator panel: precise graphite
+   surfaces, paper-neutral light mode, and a high-contrast teal control
+   color. Text tokens are selected for WCAG AA contrast on their surfaces.
+   ============================================================ */
 :root, [data-theme="light"]{
-  --primary:#8f1e3f;
-  --primary-2:#a72b50;
-  --primary-solid:#8f1e3f;
-  --primary-solid-hover:#7a1734;
-  --on-primary:#ffffff;
-  --primary-light:rgba(143,30,63,.08);
-  --primary-dark:#7a1734;
-  --primary-glow:rgba(143,30,63,.22);
-  --success:#146c40;
-  --success-soft:rgba(20,108,64,.10);
-  --warning:#8a5704;
-  --warning-soft:rgba(138,87,4,.12);
-  --danger:#c03030;
-  --danger-soft:rgba(192,48,48,.09);
-  --info:#2563a8;
-  --info-soft:rgba(37,99,168,.09);
-  --bg:#f2f3f6;
-  --bg-accent-1:rgba(143,30,63,.045);
-  --bg-accent-2:rgba(37,99,168,.035);
-  --surface:#ffffff;
-  --surface-2:#f7f8fa;
-  --surface-3:#eceef3;
-  --surface-elevated:#ffffff;
-  --border:rgba(24,28,38,.10);
-  --border-strong:rgba(24,28,38,.17);
-  --text:#1a1d26;
-  --text-muted:#565f6f;
-  --text-soft:#6d7585;
-  --rail-bg:#1c1f27;
-  --rail-from:#1c1f27;
-  --rail-mid:#1c1f27;
-  --rail-to:#1c1f27;
-  --header-bg:rgba(255,255,255,.86);
-  --header-border:rgba(24,28,38,.09);
-  --switch-bg:#e8eaef;
-  --checker-a:#e3e6ec;
-  --checker-b:#f3f4f7;
-  --table-header:#f6f7f9;
-  --table-hover:rgba(143,30,63,.045);
-  --table-stripe:#fafbfc;
-  --table-selected:rgba(143,30,63,.08);
-  --empty-stripe-a:#f7f8fa;
-  --empty-stripe-b:#eef0f4;
-  --shadow-sm:0 1px 2px rgba(24,28,38,.05);
-  --shadow-md:0 8px 24px -12px rgba(24,28,38,.16), 0 1px 2px rgba(24,28,38,.05);
-  --shadow-lg:0 24px 56px -24px rgba(24,28,38,.30);
-  --shadow-glow:0 10px 28px -12px var(--primary-glow);
-  --toast-bg:#22252e;
-  --scrollbar:#c9ced9;
-  --scrollbar-hover:#adb3c2;
-  --radius:14px;
-  --radius-sm:10px;
-  --radius-xs:7px;
-  --rail:64px;
-  --ease:cubic-bezier(.4,0,.2,1);
-  color-scheme:light;
+  --primary:#0b756c; --primary-2:#11867b;
+  --primary-solid:#0a756b; --primary-solid-hover:#075e57; --on-primary:#fff;
+  --primary-light:rgba(11,117,108,.09); --primary-dark:#075e57; --primary-glow:rgba(11,117,108,.18);
+  --success:#16623e; --success-soft:rgba(22,98,62,.10);
+  --warning:#81500a; --on-warning:#fff;
+  --danger-solid:#a5232c; --warning-soft:rgba(129,80,10,.11);
+  --danger:#b4232d; --danger-soft:rgba(180,35,45,.09);
+  --info:#1f5c97; --info-soft:rgba(31,92,151,.09);
+  --bg:#f1f5f4; --bg-accent-1:rgba(11,117,108,.035); --bg-accent-2:rgba(35,88,80,.025);
+  --surface:#fff; --surface-2:#f7faf9; --surface-3:#edf2f0; --surface-elevated:#fff;
+  --border:rgba(25,49,46,.11); --border-strong:rgba(25,49,46,.20);
+  --text:#152422; --text-muted:#425451; --text-soft:#596a67;
+  --rail-bg:#202726; --rail-from:#202726; --rail-mid:#202726; --rail-to:#202726;
+  --header-bg:rgba(255,255,255,.94); --header-border:rgba(25,49,46,.10); --switch-bg:#e8efed;
+  --checker-a:#e2eae7; --checker-b:#f3f7f5; --table-header:#f2f6f4;
+  --table-hover:rgba(11,117,108,.045); --table-stripe:#fafcfb; --table-selected:rgba(11,117,108,.085);
+  --empty-stripe-a:#f6f9f8; --empty-stripe-b:#edf3f1;
+  --shadow-sm:0 1px 2px rgba(22,44,41,.06);
+  --shadow-md:0 8px 24px -12px rgba(22,44,41,.17),0 1px 2px rgba(22,44,41,.05);
+  --shadow-lg:0 24px 56px -24px rgba(22,44,41,.30); --shadow-glow:0 8px 22px -12px var(--primary-glow);
+  --toast-bg:#202726; --scrollbar:#c6d1ce; --scrollbar-hover:#aab9b5;
+  --radius:10px; --radius-sm:7px; --radius-xs:5px; --rail:56px;
+  --ease:cubic-bezier(.2,.75,.25,1); color-scheme:light;
 }
 
-/* =========================================================
-   DESIGN TOKENS — DARK "TINTA"
-   Grafit netral (bukan hitam pekat), aksen rose terang.
-   --primary = warna aksen di atas surface gelap (kontras ≥4.5),
-   --primary-solid = isi tombol (teks putih di atasnya ≥4.5).
-   ========================================================= */
 [data-theme="dark"]{
-  --primary:#e0799a;
-  --primary-2:#eda3bb;
-  --primary-solid:#c24970;
-  --primary-solid-hover:#d15b81;
-  --on-primary:#ffffff;
-  --primary-light:rgba(224,121,154,.14);
-  --primary-dark:#eda3bb;
-  --primary-glow:rgba(224,121,154,.28);
-  --success:#7ac793;
-  --success-soft:rgba(122,199,147,.13);
-  --warning:#e5b45a;
-  --warning-soft:rgba(229,180,90,.13);
-  --danger:#ef8a80;
-  --danger-soft:rgba(239,138,128,.13);
-  --info:#8ab4f8;
-  --info-soft:rgba(138,180,248,.13);
-  --bg:#14161b;
-  --bg-accent-1:rgba(224,121,154,.05);
-  --bg-accent-2:rgba(138,180,248,.03);
-  --surface:#1c1f26;
-  --surface-2:#21252e;
-  --surface-3:#2a2f3a;
-  --surface-elevated:#272c36;
-  --border:rgba(235,238,245,.11);
-  --border-strong:rgba(235,238,245,.20);
-  --text:#e9ebf1;
-  --text-muted:#a8afbd;
-  --text-soft:#848c9c;
-  --rail-bg:#101216;
-  --rail-from:#101216;
-  --rail-mid:#101216;
-  --rail-to:#101216;
-  --header-bg:rgba(28,31,38,.88);
-  --header-border:rgba(235,238,245,.09);
-  --switch-bg:#2a2f3a;
-  --checker-a:#22262f;
-  --checker-b:#1a1d24;
-  --table-header:#22262f;
-  --table-hover:rgba(224,121,154,.07);
-  --table-stripe:#1e222a;
-  --table-selected:rgba(224,121,154,.13);
-  --empty-stripe-a:#1e2129;
-  --empty-stripe-b:#252933;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.35);
-  --shadow-md:0 10px 28px -14px rgba(0,0,0,.55);
-  --shadow-lg:0 28px 60px -26px rgba(0,0,0,.65);
-  --shadow-glow:0 10px 28px -12px var(--primary-glow);
-  --toast-bg:#2a2f3a;
-  --scrollbar:#3a404d;
-  --scrollbar-hover:#4c5364;
-  color-scheme:dark;
+  --primary:#66d8cb; --primary-2:#8ce8dd;
+  --primary-solid:#08746b; --primary-solid-hover:#08766e; --on-primary:#fff;
+  --primary-light:rgba(102,216,203,.13); --primary-dark:#8ce8dd; --primary-glow:rgba(102,216,203,.22);
+  --success:#85d5a5; --success-soft:rgba(133,213,165,.13);
+  --warning:#f0c66e; --warning-soft:rgba(240,198,110,.13); --on-warning:#24231d;
+  --danger-solid:#a5232c;
+  --danger:#f19b92; --danger-soft:rgba(241,155,146,.13);
+  --info:#a9c8f1; --info-soft:rgba(169,200,241,.13);
+  --bg:#171c1d; --bg-accent-1:rgba(102,216,203,.045); --bg-accent-2:rgba(169,200,241,.025);
+  --surface:#202728; --surface-2:#252d2d; --surface-3:#303939; --surface-elevated:#2b3333;
+  --border:rgba(232,244,241,.12); --border-strong:rgba(232,244,241,.22);
+  --text:#f1f6f5; --text-muted:#bfcac8; --text-soft:#aab8b5;
+  --rail-bg:#111617; --rail-from:#111617; --rail-mid:#111617; --rail-to:#111617;
+  --header-bg:rgba(32,39,40,.96); --header-border:rgba(232,244,241,.10); --switch-bg:#171d1e;
+  --checker-a:#292f30; --checker-b:#1d2324; --table-header:#1c2324;
+  --table-hover:rgba(102,216,203,.07); --table-stripe:#222929; --table-selected:rgba(102,216,203,.13);
+  --empty-stripe-a:#202728; --empty-stripe-b:#293131;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.35); --shadow-md:0 10px 28px -14px rgba(0,0,0,.55);
+  --shadow-lg:0 28px 60px -26px rgba(0,0,0,.65); --shadow-glow:0 8px 22px -12px var(--primary-glow);
+  --toast-bg:#2b3333; --scrollbar:#465150; --scrollbar-hover:#596664; color-scheme:dark;
 }
 
-/* =========================================================
-   DESIGN TOKENS — GLASS "KACA" (frosted, aksen rose senada)
-   ========================================================= */
 [data-theme="glass"]{
-  --primary:#e68aa7;
-  --primary-2:#f2adc2;
-  --primary-solid:#c24970;
-  --primary-solid-hover:#d15b81;
-  --on-primary:#ffffff;
-  --primary-light:rgba(230,138,167,.13);
-  --primary-dark:#f2adc2;
-  --primary-glow:rgba(230,138,167,.26);
-  --success:#7dd8a8;
-  --success-soft:rgba(125,216,168,.13);
-  --warning:#ecc26b;
-  --warning-soft:rgba(236,194,107,.13);
-  --danger:#f0968c;
-  --danger-soft:rgba(240,150,140,.13);
-  --info:#8fc2f8;
-  --info-soft:rgba(143,194,248,.13);
-  --bg:#0a0c12;
-  --bg-accent-1:rgba(224,121,154,.07);
-  --bg-accent-2:rgba(120,150,220,.06);
-  --surface:rgba(255,255,255,.055);
-  --surface-2:rgba(255,255,255,.035);
-  --surface-3:rgba(255,255,255,.10);
-  --surface-elevated:rgba(21,24,33,.92);
-  --border:rgba(255,255,255,.12);
-  --border-strong:rgba(255,255,255,.22);
-  --text:#f1f3f8;
-  --text-muted:#aab2c4;
-  --text-soft:#8b93a7;
-  --rail-bg:rgba(10,12,18,.80);
-  --rail-from:rgba(10,12,18,.80);
-  --rail-mid:rgba(10,12,18,.74);
-  --rail-to:rgba(10,12,18,.68);
-  --header-bg:rgba(10,12,18,.60);
-  --header-border:rgba(255,255,255,.10);
-  --switch-bg:rgba(255,255,255,.08);
-  --checker-a:#14161f;
-  --checker-b:#0d0f16;
-  --table-header:rgba(16,18,28,.85);
-  --table-hover:rgba(230,138,167,.07);
-  --table-stripe:rgba(255,255,255,.022);
-  --table-selected:rgba(230,138,167,.14);
-  --empty-stripe-a:rgba(255,255,255,.03);
-  --empty-stripe-b:rgba(255,255,255,.065);
-  --shadow-sm:0 1px 2px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04);
-  --shadow-md:0 16px 40px -18px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.06);
-  --shadow-lg:0 40px 80px -30px rgba(0,0,0,.85);
-  --shadow-glow:0 10px 28px -12px var(--primary-glow);
-  --toast-bg:rgba(22,25,35,.94);
-  --scrollbar:rgba(255,255,255,.16);
-  --scrollbar-hover:rgba(255,255,255,.28);
-  color-scheme:dark;
+  --primary:#70e1d4; --primary-2:#98eee4;
+  --primary-solid:#08746b; --primary-solid-hover:#08766e; --on-primary:#fff;
+  --primary-light:rgba(112,225,212,.14); --primary-dark:#98eee4; --primary-glow:rgba(112,225,212,.25);
+  --success:#8bdfb1; --success-soft:rgba(139,223,177,.13);
+  --warning:#f3d07d; --warning-soft:rgba(243,208,125,.13); --on-warning:#24231d;
+  --danger-solid:#a5232c;
+  --danger:#f4a49b; --danger-soft:rgba(244,164,155,.13);
+  --info:#add0f7; --info-soft:rgba(173,208,247,.13);
+  --bg:#101516; --bg-accent-1:rgba(112,225,212,.06); --bg-accent-2:rgba(122,162,196,.05);
+  --surface:rgba(255,255,255,.065); --surface-2:rgba(255,255,255,.045); --surface-3:rgba(255,255,255,.105);
+  --surface-elevated:rgba(23,30,31,.96); --border:rgba(238,247,245,.14); --border-strong:rgba(238,247,245,.25);
+  --text:#f3f7f6; --text-muted:#c4d0ce; --text-soft:#acbcb9;
+  --rail-bg:rgba(12,17,18,.88); --rail-from:rgba(12,17,18,.88); --rail-mid:rgba(12,17,18,.82); --rail-to:rgba(12,17,18,.76);
+  --header-bg:rgba(16,21,22,.86); --header-border:rgba(238,247,245,.12); --switch-bg:rgba(255,255,255,.09);
+  --checker-a:#1a2223; --checker-b:#111819; --table-header:rgba(20,27,28,.92);
+  --table-hover:rgba(112,225,212,.075); --table-stripe:rgba(255,255,255,.028); --table-selected:rgba(112,225,212,.14);
+  --empty-stripe-a:rgba(255,255,255,.035); --empty-stripe-b:rgba(255,255,255,.075);
+  --shadow-sm:0 1px 2px rgba(0,0,0,.48),0 0 0 1px rgba(255,255,255,.04);
+  --shadow-md:0 16px 40px -18px rgba(0,0,0,.66),0 0 0 1px rgba(255,255,255,.055);
+  --shadow-lg:0 40px 80px -30px rgba(0,0,0,.85); --shadow-glow:0 8px 22px -12px var(--primary-glow);
+  --toast-bg:rgba(26,34,35,.97); --scrollbar:rgba(255,255,255,.18); --scrollbar-hover:rgba(255,255,255,.30); color-scheme:dark;
 }
 
-/* =========================================================
-   DESIGN TOKENS — AI (Illustrator Slim panel)
-   Abu-abu persis UI Illustrator Dark (#323232), kontrol
-   kecil radius 4px, kepadatan tinggi. Aksen mengikuti
-   identitas aplikasi (rose lak), bukan biru.
-   ========================================================= */
+/* Illustrator graphite, with teal accents tuned to remain legible on docked panels. */
 [data-theme="ai"]{
-  /* Aksen lebih terang dari tema dark: teks aksen harus ≥4.5:1 di atas #3b3b3b */
-  --primary:#e88ca9;
-  --primary-2:#f0a7bd;
-  --primary-solid:#c24970;
-  --primary-solid-hover:#d15b81;
-  --on-primary:#ffffff;
-  --primary-light:rgba(232,140,169,.13);
-  --primary-dark:#f0a7bd;
-  --primary-glow:rgba(232,140,169,.22);
-  --success:#a3e0b9;
-  --success-soft:rgba(163,224,185,.10);
-  --warning:#ecc978;
-  --warning-soft:rgba(236,201,120,.10);
-  --danger:#f5a49c;
-  --danger-soft:rgba(245,164,156,.10);
-  --info:#a8c7fa;
-  --info-soft:rgba(168,199,250,.10);
-  --bg:#323232;
-  --bg-accent-1:transparent;
-  --bg-accent-2:transparent;
-  --surface:#3b3b3b;
-  --surface-2:#353535;
-  --surface-3:#454545;
-  --surface-elevated:#444444;
-  --border:rgba(0,0,0,.35);
-  --border-strong:rgba(0,0,0,.55);
-  --text:#dcdcdc;
-  --text-muted:#acacac;
-  --text-soft:#989898;
-  --rail-bg:#292929;
-  --rail-from:#292929;
-  --rail-mid:#292929;
-  --rail-to:#292929;
-  --header-bg:rgba(46,46,46,.97);
-  --header-border:rgba(0,0,0,.45);
-  --switch-bg:#292929;
-  --checker-a:#393939;
-  --checker-b:#2f2f2f;
-  --table-header:#2d2d2d;
-  --table-hover:rgba(224,121,154,.08);
-  --table-stripe:#363636;
-  --table-selected:rgba(224,121,154,.15);
-  --empty-stripe-a:#373737;
-  --empty-stripe-b:#3e3e3e;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.35);
-  --shadow-md:0 4px 12px rgba(0,0,0,.4);
-  --shadow-lg:0 12px 32px rgba(0,0,0,.55);
-  --shadow-glow:0 4px 14px -4px var(--primary-glow);
-  --toast-bg:#444444;
-  --scrollbar:#525252;
-  --scrollbar-hover:#666666;
-  --radius:6px;
-  --radius-sm:5px;
-  --radius-xs:4px;
-  --rail:46px;
-  color-scheme:dark;
+  --primary:#71ded1; --primary-2:#95ebe0;
+  --primary-solid:#08746b; --primary-solid-hover:#08766e; --on-primary:#fff;
+  --primary-light:rgba(113,222,209,.14); --primary-dark:#95ebe0; --primary-glow:rgba(113,222,209,.22);
+  --success:#93ddb0; --success-soft:rgba(147,221,176,.11);
+  --warning:#f0cf7b; --warning-soft:rgba(240,207,123,.11); --on-warning:#24231d;
+  --danger-solid:#a5232c;
+  --danger:#f5ada5; --danger-soft:rgba(245,173,165,.11);
+  --info:#b4d0f4; --info-soft:rgba(180,208,244,.11);
+  --bg:#303535; --bg-accent-1:transparent; --bg-accent-2:transparent;
+  --surface:#383f3f; --surface-2:#343a3a; --surface-3:#454b4b; --surface-elevated:#414848;
+  --border:rgba(232,244,241,.14); --border-strong:rgba(232,244,241,.25);
+  --text:#f1f6f5; --text-muted:#c2cdcb; --text-soft:#bbc7c5;
+  --rail-bg:#262c2d; --rail-from:#262c2d; --rail-mid:#262c2d; --rail-to:#262c2d;
+  --header-bg:rgba(43,49,50,.98); --header-border:rgba(232,244,241,.12); --switch-bg:#292f30;
+  --checker-a:#3d4444; --checker-b:#303737; --table-header:#292f30;
+  --table-hover:rgba(113,222,209,.085); --table-stripe:#353c3c; --table-selected:rgba(113,222,209,.16);
+  --empty-stripe-a:#353b3b; --empty-stripe-b:#3c4343;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.32); --shadow-md:0 5px 14px rgba(0,0,0,.36);
+  --shadow-lg:0 14px 36px rgba(0,0,0,.52); --shadow-glow:0 5px 16px -5px var(--primary-glow);
+  --toast-bg:#414848; --scrollbar:#596161; --scrollbar-hover:#707a79;
+  --radius:7px; --radius-sm:5px; --radius-xs:4px; --rail:44px; color-scheme:dark;
 }
-/* AI: teks aksen di atas chip berlapis tint memakai latar gelap solid
-   agar kontras tetap ≥ 4.5:1 (tint di atas #3b3b3b terlalu terang). */
 [data-theme="ai"] .section-pill,
 [data-theme="ai"] .chip-btn.active,
 [data-theme="ai"] .ph-chip:hover{
-  background:var(--switch-bg);
-  box-shadow:inset 0 0 0 1px var(--primary);
+  background:var(--switch-bg); box-shadow:inset 0 0 0 1px var(--primary);
 }
 [data-theme="ai"] .drop-zone,
 [data-theme="ai"] .stat-card{background:var(--surface-2)}
@@ -334,7 +187,7 @@ html.theme-animating body{transition:background-color .35s var(--ease), color .3
   box-shadow:0 6px 16px -6px rgba(0,0,0,.5);
   margin-bottom:8px;
 }
-[data-theme="light"] .rail-logo{background:linear-gradient(150deg,#a72b50,#7a1734)}
+[data-theme="light"] .rail-logo{background:linear-gradient(150deg,var(--primary-2),var(--primary-dark))}
 .rail-sep{
   width:26px;height:1px;
   background:rgba(255,255,255,.14);
@@ -628,7 +481,7 @@ main{
   border-color:transparent;
   color:var(--danger);
 }
-.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-danger:hover{background:var(--danger-solid);color:#fff}
 .btn-success{
   background:var(--success);
   color:#fff;
@@ -775,7 +628,7 @@ select option:hover{background-color:var(--primary-light)}
 select option:disabled{color:var(--text-soft)}
 [data-theme="glass"] select option{background-color:#161924;color:#f1f3f8}
 [data-theme="dark"] select option{background-color:#272c36;color:#e9ebf1}
-[data-theme="ai"] select option{background-color:#444;color:#dcdcdc}
+[data-theme="ai"] select option{background-color:#414848;color:#f1f6f5}
 select:-moz-focusring{color:transparent;text-shadow:0 0 0 var(--text)}
 
 textarea{resize:vertical;min-height:160px;font-family:'JetBrains Mono',Consolas,ui-monospace,monospace;font-size:12.5px;line-height:1.7}
@@ -1192,7 +1045,7 @@ td input[type="text"]:focus,td textarea:focus{
   transition:background .16s var(--ease), color .16s var(--ease);
 }
 .ea-action:hover .ea-action-icon{background:var(--primary-solid);color:var(--on-primary)}
-.ea-action-warn:hover .ea-action-icon{background:var(--warning);color:#fff}
+.ea-action-warn:hover .ea-action-icon{background:var(--warning);color:var(--on-warning)}
 .ea-icon-az,.ea-icon-za,.ea-icon-clean,.ea-icon-dup,.ea-icon-long{color:var(--text-muted)}
 .ea-action-name{font-size:12.5px;font-weight:700;color:var(--text)}
 .ea-action-desc{font-size:10.5px;color:var(--text-muted);font-weight:500;line-height:1.45}
@@ -1478,3 +1331,201 @@ td input[type="text"]:focus,td textarea:focus{
     transition-duration:.01ms !important;
   }
 }
+
+/* ============================================================
+   ILLUSTRATOR PANEL REDESIGN
+   Compact dockable workspace, teal is reserved for active state
+   and the primary action. The artboard remains the only patterned
+   surface; controls stay quiet and easy to scan.
+   ============================================================ */
+body{font-size:13.5px;line-height:1.48;overflow-x:hidden}
+button,input,select,textarea{font:inherit}
+.app-shell{min-height:100vh}
+.app-main{min-width:0}
+header{padding:9px 18px}
+.header-content{max-width:none;gap:14px}
+.logo{gap:9px}
+.logo-icon{
+  width:36px;height:36px;flex:0 0 36px;border-radius:8px;
+  background:var(--primary-solid);box-shadow:none;font-size:15px;color:var(--on-primary)
+}
+.logo h1{font-size:15px;letter-spacing:-.025em}
+.logo p{font-size:11.5px;color:var(--text-muted);font-weight:500}
+.switch-container{gap:4px;padding:3px;background:var(--switch-bg);border:1px solid var(--border);border-radius:7px}
+.switch-btn{min-height:34px;padding:7px 13px;border-radius:5px;font-size:12.5px;gap:7px}
+.switch-btn.active{background:var(--surface);color:var(--primary);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.header-actions{gap:7px}
+.header-settings-btn{
+  color:var(--text-muted);background:var(--surface-2);border:1px solid var(--border);
+  width:34px;height:34px;border-radius:6px
+}
+.header-settings-btn:hover{color:var(--primary);background:var(--primary-light);border-color:var(--primary)}
+.theme-switch-track{border-radius:7px}
+.theme-switch-thumb,.theme-switch-opt{border-radius:5px}
+.theme-switch-opt{height:28px}
+main{max-width:none;padding:20px 22px 36px}
+.view-intro{align-items:center;margin-bottom:14px}
+.view-intro h2{font-size:19px;letter-spacing:-.025em}
+.view-intro p{font-size:12.5px;margin-top:3px}
+.view-intro-icon{width:36px;height:36px;flex-basis:36px;border-radius:7px;font-size:14px}
+.workspace-overview{border-radius:8px;box-shadow:none}
+.stepper{border-radius:8px;box-shadow:none}
+.card{border-radius:8px;box-shadow:none}
+.card-header{padding:12px 16px;background:var(--surface-2)}
+.card-title{font-size:13.5px}
+.card-title i{width:26px;height:26px;border-radius:6px}
+.card-body{padding:16px}
+.editor-card .card-body{padding:14px}
+.card-header .badge{padding:6px 9px;border-radius:5px}
+.input-grid{grid-template-columns:minmax(320px,.78fr) minmax(0,1.5fr);gap:14px}
+.maker-grid{grid-template-columns:minmax(320px,.78fr) minmax(0,1.5fr);gap:14px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12.5px;margin-bottom:7px}
+.form-hint{font-size:12px;line-height:1.5}
+textarea,input[type="text"],input[type="number"],select{font-size:13px;border-radius:6px}
+[data-theme="ai"] textarea,[data-theme="ai"] input[type="text"],
+[data-theme="ai"] input[type="number"],[data-theme="ai"] select{font-size:13px}
+textarea{line-height:1.6}
+.settings-label,.ea-label{font-size:12px;color:var(--text-muted);letter-spacing:0}
+.checkbox-label{font-size:12.5px}
+.drop-zone{padding:19px 16px;border-radius:7px}
+.drop-zone .icon{font-size:24px;color:var(--primary);margin-bottom:6px}
+.drop-zone h3{font-size:13px}
+.drop-zone p{font-size:12px}
+.divider-or{font-size:11.5px}
+.btn{min-height:36px;border-radius:6px;font-size:13px}
+.btn-sm{min-height:32px;padding:6px 10px;font-size:12px}
+.btn-primary{box-shadow:none}
+.btn-success{background:var(--primary-solid);color:var(--on-primary)}
+.btn-success:hover{background:var(--primary-solid-hover);filter:none}
+.toolbar-btn{min-height:32px;padding:6px 9px;font-size:12px;border-radius:5px}
+.toolbar-btn.tb-success,.toolbar-btn.tb-info,.toolbar-btn.tb-warning,.toolbar-btn.tb-danger{font-weight:600}
+.chip-btn{border-radius:6px;padding:8px 10px;font-size:12px}
+.chip-btn small{font-size:11.5px}
+.section-preamble{margin-bottom:12px}
+.section-mini-stats .mini-stat-label,.workspace-stat-label{font-size:11.5px}
+.mini-stat-card{border-radius:6px;padding:7px 11px}
+.stat-card{padding:9px 7px;border-radius:6px}
+.stat-value{font-size:18px}
+.stat-label{font-size:11.5px}
+.editor-card-header{gap:10px}
+.editor-main-title{font-size:13.5px}
+.editor-subtitle{font-size:11.5px}
+.editor-header-actions{gap:6px}
+.editor-header-count{border-radius:5px;padding:6px 9px}
+.toolbar{border-radius:6px}
+.tg-head{font-size:11.5px;letter-spacing:0}
+.editor-search{border-radius:6px;padding:8px 11px}
+.es-icon{width:28px;height:28px;flex-basis:28px;border-radius:6px}
+.es-field label{font-size:11.5px}
+.es-hint{font-size:11.5px}
+.table-wrap{border-radius:6px}
+.table-subhead{padding:9px 12px}
+.ts-title{font-size:12.5px}
+.ts-count{font-size:11.5px}
+th{font-size:11.5px;padding:9px 10px}
+table{font-size:12.5px}
+td input[type="text"],td textarea{font-size:12.5px}
+.empty-state{background:var(--surface-2);padding:38px 20px}
+.empty-state-icon{font-size:28px}
+.empty-state h3{font-size:14px}
+.empty-state p{font-size:12px}
+.editor-accordion{border-radius:6px}
+.ea-header{padding:11px 13px}
+.ea-title{gap:9px}
+.ea-icon{width:30px;height:30px;flex-basis:30px;border-radius:6px}
+.ea-name{font-size:13px}
+.ea-desc{font-size:11.5px}
+.ea-chip{font-size:11.5px;padding:4px 7px}
+.ea-content{padding:13px}
+.ea-hint{font-size:12px;padding:10px 11px}
+.ea-subtitle{font-size:12.5px}
+.ea-action{border-radius:6px;padding:10px 11px}
+.ea-action-name{font-size:12.5px}
+.ea-action-desc{font-size:11.5px}
+.accordion-header{padding:11px 15px}
+.accordion-content{padding:14px 15px 16px}
+.settings-title{font-size:12.5px}
+.format-toolbar{border-radius:6px}
+.format-btn{min-width:34px;height:32px;border-radius:4px}
+.preview-toolbar{padding:9px 12px;border-radius:7px 7px 0 0}
+.preview-area{min-height:430px;padding:20px;border-radius:0 0 7px 7px}
+.modal-card{border-radius:8px}
+.modal-header{padding:13px 16px}
+.modal-body{padding:16px}
+.toast-container{right:14px;bottom:14px}
+
+/* CEP's workflow tabs replace the duplicated overview and four-step banner. */
+.cep-panel .rail,
+.cep-panel #workflowStepper,
+.cep-panel .workspace-overview,
+.cep-panel .section-preamble{display:none!important}
+.cep-panel header{padding:9px 16px}
+.cep-panel main{padding:16px 18px 28px}
+.cep-panel .view-intro{margin-bottom:13px}
+.cep-panel .editor-tools{gap:9px}
+.cep-panel .toolbar.editor-toolbar{
+  flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;
+  gap:6px;padding:1px 1px 5px;border:0;background:transparent;scrollbar-width:thin
+}
+.cep-panel .toolbar-group{
+  flex:0 0 auto;width:auto;min-width:max-content;padding:7px 9px;
+  border:1px solid var(--border);border-radius:6px;background:var(--surface-2)
+}
+.cep-panel .toolbar-group:last-child{border-right:1px solid var(--border)}
+.cep-panel .tg-buttons{flex-wrap:nowrap}
+.cep-panel .toolbar-btn{white-space:nowrap}
+.cep-panel .table-container{max-height:450px}
+.cep-panel .preview-area{min-height:360px}
+
+@media(max-width:680px){
+  .input-grid,.maker-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+}
+@media(max-width:720px){
+  .rail{display:none}
+  #workflowStepper,.workspace-overview,.section-preamble{display:none!important}
+  header{padding:8px 12px}
+  .header-content{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;align-items:center
+  }
+  .logo{grid-column:1;min-width:0}
+  .logo-icon{width:33px;height:33px;flex-basis:33px}
+  .logo h1{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .logo p{font-size:11px}
+  .header-actions{grid-column:2;gap:5px}
+  .header-settings-btn{width:32px;height:32px;flex:0 0 32px}
+  .switch-container{grid-column:1/-1;width:100%;display:grid;grid-template-columns:1fr 1fr;padding:3px}
+  .switch-btn{justify-content:center;min-height:34px;padding:6px 8px;font-size:12.5px}
+  main,.cep-panel main{padding:13px 12px 24px}
+  .view-intro h2{font-size:17px}
+  .view-intro p{font-size:12px;max-width:58ch}
+  .view-intro-icon{display:none}
+  .card-header{padding:11px 12px}
+  .card-body,.editor-card .card-body{padding:12px}
+  .settings-row{gap:9px}
+  .preview-toolbar{align-items:flex-start;gap:8px}
+  .preview-controls{gap:6px}
+  .preview-area{padding:12px;min-height:320px}
+  .modal-overlay{padding:12px}
+}
+@media(max-width:430px){
+  .logo p{display:none}
+  .header-actions{gap:4px}
+  .theme-switch-opt{width:29px}
+  .theme-switch-thumb{width:29px}
+  [data-theme="dark"] .theme-switch-thumb{transform:translateX(31px)}
+  [data-theme="glass"] .theme-switch-thumb{transform:translateX(62px)}
+  [data-theme="ai"] .theme-switch-thumb{transform:translateX(93px)}
+  .card-title{font-size:12.5px}
+  .editor-header-actions{width:100%}
+  .editor-header-count{margin-right:auto}
+  .ea-desc{display:none}
+  .ea-content{padding:11px}
+}
+.view-intro-icon{
+  border:1px solid var(--border);cursor:pointer;
+  transition:background .16s var(--ease),border-color .16s var(--ease),color .16s var(--ease)
+}
+.view-intro-icon:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.cep-panel .view-intro-icon{display:flex}
+@media(max-width:720px){.cep-panel .view-intro-icon{display:flex}}
